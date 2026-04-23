@@ -3,3 +3,5 @@ node_modules/
 npm-debug.log*
 docs/
 AGENTS.md
+public/app.js
+public/app.js.map

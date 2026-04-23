@@ -16,20 +16,25 @@
         </div>
         <div class="status-group">
           <span id="connection-status" class="status-pill">Connecting</span>
+          <button id="reconnect-button" class="ghost-link" type="button">Reconnect</button>
           <a class="ghost-link" href="/">About</a>
         </div>
       </header>
 
       <section id="empty-state" class="empty-state hidden">
-        <h2>No shared tmux session found</h2>
+        <h2>No tmux session found</h2>
         <p>
-          Start the session locally, then reload this page:
-          <code>tmux new -As panehop</code>
+          Start or select a session locally, then reload this page:
+          <code>tmux ls</code> or <code>tmux new -As panehop</code>
         </p>
       </section>
 
       <main id="app-content" class="app-content hidden">
         <nav class="nav-strip">
+          <div>
+            <p class="nav-label">Sessions</p>
+            <div id="session-tabs" class="tab-row"></div>
+          </div>
           <div>
             <p class="nav-label">Windows</p>
             <div id="window-tabs" class="tab-row"></div>
@@ -45,6 +50,17 @@
             <span id="pane-title">Pane</span>
             <span id="pane-subtitle"></span>
           </div>
+          <section id="font-check" class="font-check" data-tone="warn">
+            <div>
+              <p class="nav-label">Font Check</p>
+              <p id="font-check-headline" class="font-check-headline">Checking browser font coverage…</p>
+              <p id="font-check-details" class="font-check-details"></p>
+            </div>
+            <div class="font-check-actions">
+              <code id="font-check-sample" class="font-check-sample"></code>
+              <button id="font-check-refresh" class="tab-button" type="button">Recheck</button>
+            </div>
+          </section>
           <div id="terminal" class="terminal-mount"></div>
         </section>
       </main>
@@ -62,7 +78,6 @@
       </footer>
     </div>
 
-    <script src="/vendor/xterm/lib/xterm.js"></script>
     <script src="/app.js" defer></script>
   </body>
 </html>
