@@ -4,10 +4,10 @@
  * Purpose: derive UI-facing selection and label state from backend protocol
  * data without touching the DOM.
  *
- * Boundary: client-only. These helpers should stay free of server runtime
- * behavior and browser side effects.
+ * Boundary: client-only. These helpers are owned by app state and should stay
+ * free of server runtime behavior and browser side effects.
  */
-import type { PaneInfo, SessionSummary, WindowInfo } from "../server/protocol.js";
+import type { SessionSummary, WindowInfo } from "../../server/protocol.js";
 
 export interface SelectionState {
   selectedSessionName: string | null;
@@ -37,7 +37,7 @@ export function getSelectedPane(
   windows: WindowInfo[],
   selectedWindowId: string | null,
   selectedPaneId: string | null,
-): PaneInfo | null {
+): WindowInfo["panes"][number] | null {
   return (
     getSelectedWindow(windows, selectedWindowId)?.panes.find(
       (pane) => pane.id === selectedPaneId,
@@ -92,8 +92,4 @@ export function getRecoveredSelection(
   }
 
   return getInitialSelection(windows, activePaneId);
-}
-
-export function getPaneSubtitle(pane: PaneInfo | null): string {
-  return pane ? [pane.cwd, pane.command].filter(Boolean).join(" • ") : "";
 }

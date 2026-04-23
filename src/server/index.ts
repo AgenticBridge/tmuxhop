@@ -42,8 +42,8 @@ const __dirname = path.dirname(__filename);
 
 const HOST = process.env.HOST || "127.0.0.1";
 const PORT = Number(process.env.PORT || 3000);
-const publicDir = path.join(__dirname, "..", "..", "public");
-const xtermDir = path.join(__dirname, "..", "..", "node_modules", "@xterm", "xterm");
+const clientDistDir = path.join(__dirname, "..", "..", "dist", "client");
+const clientPagesDir = path.join(clientDistDir, "pages");
 
 export interface PaneStreamLike {
   initialSnapshot: string;
@@ -108,15 +108,14 @@ export function createApp(dependencies: ServerDependencies = defaultDependencies
   const app = express();
 
   app.use(express.json());
-  app.use("/vendor/xterm", express.static(xtermDir));
-  app.use(express.static(publicDir));
+  app.use(express.static(clientDistDir));
 
   app.get("/", (_req: Request, res: Response) => {
-    res.sendFile(path.join(publicDir, "index.html"));
+    res.sendFile(path.join(clientPagesDir, "index.html"));
   });
 
   app.get("/app", (_req: Request, res: Response) => {
-    res.sendFile(path.join(publicDir, "app.html"));
+    res.sendFile(path.join(clientPagesDir, "app.html"));
   });
 
   app.get("/api/sessions", async (_req: Request, res: Response<SessionsResponse>, next: NextFunction) => {

@@ -1,11 +1,12 @@
 /**
- * PaneHop font compatibility helpers.
+ * PaneHop terminal font diagnostics.
  *
  * Purpose: detect whether the browser can render terminal-critical glyph sets
  * and produce actionable font recommendations for the current terminal UI.
  *
- * Boundary: client-only. Pure report builders may be unit-tested in Node, while
- * browser probing stays limited to DOM and canvas APIs.
+ * Boundary: client-only. This module belongs to terminal support. Pure report
+ * builders may be unit-tested in Node, while browser probing stays limited to
+ * DOM and canvas APIs.
  */
 export interface FontCoverageFlags {
   boxDrawing: boolean;

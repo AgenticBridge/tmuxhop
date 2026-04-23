@@ -11,10 +11,9 @@ import { describe, expect, it } from "vitest";
 import {
   getInitialSessionName,
   getInitialSelection,
-  getPaneSubtitle,
   getRecoveredSelection,
   getSelectedPane,
-} from "../src/client/state.js";
+} from "../src/client/state/selection.js";
 import type { SessionSummary, WindowInfo } from "../src/server/protocol.js";
 
 const windows: WindowInfo[] = [
@@ -126,11 +125,5 @@ describe("getRecoveredSelection", () => {
       selectedWindowId: "@2",
       selectedPaneId: "%2",
     });
-  });
-});
-
-describe("getPaneSubtitle", () => {
-  it("joins cwd and command", () => {
-    expect(getPaneSubtitle(windows[1]!.panes[0]!)).toBe("/repo/docs • nvim");
   });
 });

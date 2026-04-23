@@ -7,10 +7,11 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "strict": true
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
 }

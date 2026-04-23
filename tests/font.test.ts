@@ -8,7 +8,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { buildFontCompatibilityReport } from "../src/client/font.js";
+import { buildFontCompatibilityReport } from "../src/client/terminal/font-diagnostics.js";
 
 describe("buildFontCompatibilityReport", () => {
   it("marks a fully supported font stack as healthy", () => {
