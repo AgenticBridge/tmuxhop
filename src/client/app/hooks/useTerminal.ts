@@ -11,10 +11,12 @@ import { useEffect, useRef } from "react";
 import type { FitAddon } from "@xterm/addon-fit";
 import type { Terminal } from "@xterm/xterm";
 
+import { ensureBundledTerminalFontReady } from "../../terminal/font-diagnostics.js";
 import { getTerminalDimensions, type TerminalDimensions } from "../../terminal/size.js";
 
 export interface UseTerminalOptions {
   onInput(data: string): void;
+  onTerminalSizeChange?(dimensions: TerminalDimensions): void;
   onReady?(): void | Promise<void>;
 }
 
@@ -27,7 +29,7 @@ export interface UseTerminalResult {
 }
 
 export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
-  const { onInput, onReady } = options;
+  const { onInput, onReady, onTerminalSizeChange } = options;
 
   const mountRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -48,6 +50,12 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
     };
 
     void (async () => {
+      const fontReadyPromise = ensureBundledTerminalFontReady();
+      await Promise.race([fontReadyPromise, waitForStartupFontBudget()]);
+      if (cancelled) {
+        return;
+      }
+
       const { createTerminalRuntime } = await import("../../terminal/runtime.js");
       if (cancelled) {
         return;
@@ -64,6 +72,14 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
       resizeObserver.observe(mount);
 
       window.addEventListener("resize", handleWindowResize);
+
+      void fontReadyPromise.then(() => {
+        if (cancelled) {
+          return;
+        }
+
+        syncTerminalSize();
+      });
 
       await onReady?.();
     })();
@@ -101,6 +117,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
 
     lastResizeRef.current = dimensions;
     terminalRef.current.resize(dimensions.cols, dimensions.rows);
+    onTerminalSizeChange?.(dimensions);
   }
 
   function resetTerminal() {
@@ -119,4 +136,10 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
     resetTerminal,
     writeToTerminal,
   };
+}
+
+function waitForStartupFontBudget() {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 250);
+  });
 }

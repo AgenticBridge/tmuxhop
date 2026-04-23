@@ -11,7 +11,29 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useAppController } from "../src/client/app/controller/useAppController.js";
-import type { AppController } from "../src/client/app/controller/types.js";
+
+const fontDiagnosticsMock = vi.hoisted(() => ({
+  createPendingFontCompatibilityReport: vi.fn(() => ({
+    boxDrawing: true,
+    powerline: true,
+    nerdFont: true,
+    status: "checking" as const,
+    headline: "Checking bundled font support",
+    details: "tmuxhop is loading the bundled Nerd Font before checking terminal glyph coverage.",
+    recommendedFonts: [],
+  })),
+  detectFontCompatibility: vi.fn(() => ({
+    boxDrawing: true,
+    powerline: true,
+    nerdFont: true,
+    status: "ok" as const,
+    headline: "Browser font coverage looks good",
+    details:
+      "The bundled Nerd Font covers pane borders, prompt icons, and fullscreen terminal apps reliably.",
+    recommendedFonts: [],
+  })),
+  ensureBundledTerminalFontReady: vi.fn().mockResolvedValue(undefined),
+}));
 
 const sessionsMock = vi.hoisted(() => ({
   loadState: vi.fn(),
@@ -66,9 +88,80 @@ vi.mock("../src/client/app/hooks/useTerminal.js", () => ({
   }),
 }));
 
+vi.mock("../src/client/terminal/font-diagnostics.js", () => ({
+  TERMINAL_FONT_STACK: '"Tmuxhop Terminal Nerd Font", monospace',
+  ...fontDiagnosticsMock,
+}));
+
 describe("useAppController", () => {
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
+  });
+
+  it("keeps font status in checking state until the bundled font preload completes", async () => {
+    let resolveFontReady: (() => void) | null = null;
+    fontDiagnosticsMock.ensureBundledTerminalFontReady.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveFontReady = resolve;
+        }),
+    );
+
+    const { result } = renderHook(() => useAppController());
+
+    expect(result.current.fontReport.status).toBe("checking");
+    expect(fontDiagnosticsMock.detectFontCompatibility).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveFontReady?.();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(fontDiagnosticsMock.detectFontCompatibility).toHaveBeenCalledTimes(1);
+    expect(result.current.fontReport.status).toBe("ok");
+  });
+
+  it("falls back from checking state if bundled font preload stalls", async () => {
+    vi.useFakeTimers();
+    fontDiagnosticsMock.ensureBundledTerminalFontReady.mockImplementationOnce(
+      () => new Promise<void>(() => {}),
+    );
+
+    const { result } = renderHook(() => useAppController());
+
+    expect(result.current.fontReport.status).toBe("checking");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(250);
+    });
+
+    expect(fontDiagnosticsMock.detectFontCompatibility).toHaveBeenCalledTimes(1);
+    expect(result.current.fontReport.status).toBe("ok");
+  });
+
+  it("refreshes the font report even if bundled font preload stalls", async () => {
+    vi.useFakeTimers();
+    fontDiagnosticsMock.ensureBundledTerminalFontReady
+      .mockResolvedValueOnce(undefined)
+      .mockImplementationOnce(() => new Promise<void>(() => {}));
+
+    const { result } = renderHook(() => useAppController());
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    fontDiagnosticsMock.detectFontCompatibility.mockClear();
+
+    await act(async () => {
+      result.current.refreshFontReport();
+      await vi.advanceTimersByTimeAsync(250);
+    });
+
+    expect(fontDiagnosticsMock.detectFontCompatibility).toHaveBeenCalledTimes(1);
   });
 
   it("loads windows and then attaches the returned pane on session change", async () => {

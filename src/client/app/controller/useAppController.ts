@@ -9,11 +9,13 @@
  * lower-level client hooks, but it should stay separate from presentational
  * React components.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ClientSocketMessage } from "../../../server/protocol.js";
 import {
+  createPendingFontCompatibilityReport,
   detectFontCompatibility,
+  ensureBundledTerminalFontReady,
   TERMINAL_FONT_STACK,
   type FontCompatibilityReport,
 } from "../../terminal/font-diagnostics.js";
@@ -27,8 +29,8 @@ import { useSessions } from "./useSessions.js";
 export function useAppController(): AppController {
   const [navScope, setNavScope] = useState<NavScope>("panes");
   const [status, setStatus] = useState<StatusState>({ label: "Connecting", tone: "default" });
-  const [fontReport, setFontReport] = useState<FontCompatibilityReport>(() =>
-    detectFontCompatibility(TERMINAL_FONT_STACK),
+  const [fontReport, setFontReport] = useState<FontCompatibilityReport>(
+    createPendingFontCompatibilityReport,
   );
   const [fontModalOpen, setFontModalOpen] = useState(false);
   const sendSocketMessageRef = useRef<(payload: ClientSocketMessage) => void>(() => {});
@@ -41,9 +43,27 @@ export function useAppController(): AppController {
     setStatus({ label, tone });
   }
 
-  function refreshFontReport() {
+  async function refreshFontReport() {
+    await waitForFontProbeBudget();
     setFontReport(detectFontCompatibility(TERMINAL_FONT_STACK));
   }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      await waitForFontProbeBudget();
+      if (cancelled) {
+        return;
+      }
+
+      setFontReport(detectFontCompatibility(TERMINAL_FONT_STACK));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const sessions = useSessions({
     onStatusChange: setStatusState,
@@ -77,6 +97,13 @@ export function useAppController(): AppController {
   const terminal = useTerminal({
     onInput: useCallback((data: string) => {
       sendSocketMessageRef.current({ type: "input", data });
+    }, []),
+    onTerminalSizeChange: useCallback((dimensions) => {
+      sendSocketMessageRef.current({
+        type: "resize",
+        cols: dimensions.cols,
+        rows: dimensions.rows,
+      });
     }, []),
     onReady: useCallback(async () => {
       try {
@@ -129,7 +156,9 @@ export function useAppController(): AppController {
       });
     },
     onShortcut: (input: string) => paneConnection.sendSocketMessage({ type: "shortcut", data: input }),
-    refreshFontReport,
+    refreshFontReport: () => {
+      void refreshFontReport();
+    },
     selectedPaneId: sessions.selectedPaneId,
     selectedSessionName: sessions.selectedSessionName,
     selectedWindowId: sessions.selectedWindowId,
@@ -144,4 +173,14 @@ export function useAppController(): AppController {
     toggleFontModal: () => setFontModalOpen((open) => !open),
     windows: sessions.windows,
   };
+}
+
+async function waitForFontProbeBudget() {
+  await Promise.race([ensureBundledTerminalFontReady(), waitForFontProbeTimeout()]);
+}
+
+function waitForFontProbeTimeout() {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 250);
+  });
 }

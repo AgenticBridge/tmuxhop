@@ -8,6 +8,8 @@
  * builders may be unit-tested in Node, while browser probing stays limited to
  * DOM and canvas APIs.
  */
+import "./nerd-font.css";
+
 export interface FontCoverageFlags {
   boxDrawing: boolean;
   powerline: boolean;
@@ -15,7 +17,7 @@ export interface FontCoverageFlags {
 }
 
 export interface FontCompatibilityReport extends FontCoverageFlags {
-  status: "ok" | "warn";
+  status: "checking" | "ok" | "warn";
   headline: string;
   details: string;
   recommendedFonts: string[];
@@ -26,7 +28,7 @@ const PROBE_CANVAS_SIZE = 48;
 const PROBE_FONT_SIZE = 28;
 
 export const TERMINAL_FONT_STACK =
-  '"JetBrainsMono Nerd Font", "MesloLGS NF", "SauceCodePro Nerd Font", "CaskaydiaCove Nerd Font", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace';
+  '"Tmuxhop Terminal Nerd Font", "JetBrainsMono Nerd Font", "MesloLGS NF", "SauceCodePro Nerd Font", "CaskaydiaCove Nerd Font", "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace';
 
 export const FONT_PROBE_SAMPLE = "┌─┐ ││ └─┘       ";
 
@@ -39,6 +41,19 @@ const GLYPH_GROUPS = {
 interface GlyphSignature {
   inkPixels: number;
   hash: number;
+}
+
+export function createPendingFontCompatibilityReport(): FontCompatibilityReport {
+  return {
+    boxDrawing: true,
+    powerline: true,
+    nerdFont: true,
+    status: "checking",
+    headline: "Checking bundled font support",
+    details:
+      "tmuxhop is loading the bundled Nerd Font before checking terminal glyph coverage.",
+    recommendedFonts: [],
+  };
 }
 
 export function buildFontCompatibilityReport(
@@ -54,7 +69,7 @@ export function buildFontCompatibilityReport(
       status: "ok",
       headline: "Browser font coverage looks good",
       details:
-        "Prompt icons, pane borders, and fullscreen terminal apps should render normally.",
+        "The bundled Nerd Font covers pane borders, prompt icons, and fullscreen terminal apps reliably.",
       recommendedFonts: [],
     };
   }
@@ -62,7 +77,7 @@ export function buildFontCompatibilityReport(
   const recommendedFonts =
     missing.includes("powerline") || missing.includes("nerdFont")
       ? ["JetBrainsMono Nerd Font", "MesloLGS NF", "CaskaydiaCove Nerd Font"]
-      : ["JetBrains Mono", "Cascadia Mono", "Menlo"];
+      : ["JetBrainsMono Nerd Font", "JetBrains Mono", "Menlo"];
 
   if (missing.length === 1 && missing[0] === "boxDrawing") {
     return {
@@ -70,7 +85,7 @@ export function buildFontCompatibilityReport(
       status: "warn",
       headline: "Terminal borders may render incorrectly",
       details:
-        "Box-drawing glyphs are missing, so pane borders and text UIs can look broken in the browser.",
+        "Even with the bundled Nerd Font, box-drawing glyphs are missing, so pane borders and text UIs can look broken in the browser.",
       recommendedFonts,
     };
   }
@@ -78,11 +93,36 @@ export function buildFontCompatibilityReport(
   return {
     ...flags,
     status: "warn",
-    headline: "Prompt icons need a Nerd Font",
+    headline: "Prompt icons are not rendering",
     details:
-      "Powerline separators or Nerd Font icons are missing, so themed prompts like oh-my-zsh may show empty boxes or fallback glyphs.",
+      "The bundled Nerd Font glyphs are not available in this browser session, so themed prompts like oh-my-zsh may show empty boxes or fallback glyphs.",
     recommendedFonts,
   };
+}
+
+export async function ensureBundledTerminalFontReady(
+  documentFonts: FontFaceSet | undefined = globalThis.document?.fonts,
+): Promise<void> {
+  if (!documentFonts) {
+    return;
+  }
+
+  const regularReady = documentFonts.check('400 16px "Tmuxhop Terminal Nerd Font"');
+  const boldReady = documentFonts.check('700 16px "Tmuxhop Terminal Nerd Font"');
+
+  if (regularReady && boldReady) {
+    return;
+  }
+
+  const pendingLoads: Promise<FontFace[]>[] = [];
+  if (!regularReady) {
+    pendingLoads.push(documentFonts.load('400 16px "Tmuxhop Terminal Nerd Font"'));
+  }
+  if (!boldReady) {
+    pendingLoads.push(documentFonts.load('700 16px "Tmuxhop Terminal Nerd Font"'));
+  }
+
+  await Promise.allSettled(pendingLoads);
 }
 
 export function detectFontCompatibility(
@@ -98,7 +138,7 @@ export function detectFontCompatibility(
         nerdFont: false,
       }),
       details:
-        "tmuxhop could not run the browser font probe. Install a Nerd Font if prompt icons still look wrong.",
+        "tmuxhop could not run the browser font probe. The bundled Nerd Font should still cover terminal layout and prompt icons, but install a local Nerd Font if glyphs still look wrong.",
     };
   }
 

@@ -70,17 +70,7 @@ export function usePaneConnection(options: UsePaneConnectionOptions): UsePaneCon
   }
 
   const syncTerminalSize = useCallback(() => {
-    const dimensions = terminal.getCurrentTerminalSize();
-    if (!dimensions) {
-      return;
-    }
-
     terminal.syncTerminalSize();
-    sendSocketMessage({
-      type: "resize",
-      cols: dimensions.cols,
-      rows: dimensions.rows,
-    });
   }, [terminal]);
 
   function buildPaneSocketUrl(paneId: string): string {

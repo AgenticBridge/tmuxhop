@@ -64,7 +64,7 @@ describe("usePaneConnection", () => {
     vi.useRealTimers();
   });
 
-  it("attaches to an explicit pane id and sends an initial resize on open", async () => {
+  it("attaches to an explicit pane id and syncs terminal sizing on open", async () => {
     vi.stubGlobal("WebSocket", MockWebSocket as unknown as typeof WebSocket);
     const terminal = createTerminalMock();
     const onStatusChange = vi.fn();
@@ -96,7 +96,6 @@ describe("usePaneConnection", () => {
     });
 
     expect(terminal.syncTerminalSize).toHaveBeenCalled();
-    expect(socket?.sent).toContain(JSON.stringify({ type: "resize", cols: 90, rows: 30 }));
     expect(onStatusChange).toHaveBeenCalledWith("Live", "ok");
   });
 
