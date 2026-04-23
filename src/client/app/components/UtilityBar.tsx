@@ -48,6 +48,8 @@ export function UtilityBar(props: UtilityBarProps) {
           aria-label={
             fontReport.status === "ok"
               ? "Font support looks good"
+              : fontReport.status === "checking"
+                ? "Checking font support"
               : "Font support needs attention"
           }
           aria-expanded={fontModalOpen}
