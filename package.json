@@ -1,0 +1,24 @@
+{
+  "name": "panehop",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "tmux",
+    "terminal",
+    "mobile",
+    "xterm"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Mobile-friendly local tmux handoff prototype",
+  "dependencies": {
+    "@xterm/xterm": "^6.0.0",
+    "express": "^5.2.1",
+    "ws": "^8.20.0"
+  }
+}

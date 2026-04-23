@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PaneHop App</title>
+    <link rel="stylesheet" href="/vendor/xterm/css/xterm.css" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="app-page">
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">PaneHop</p>
+          <h1 id="session-title">Shared Session</h1>
+        </div>
+        <div class="status-group">
+          <span id="connection-status" class="status-pill">Connecting</span>
+          <a class="ghost-link" href="/">About</a>
+        </div>
+      </header>
+
+      <section id="empty-state" class="empty-state hidden">
+        <h2>No shared tmux session found</h2>
+        <p>
+          Start the session locally, then reload this page:
+          <code>tmux new -As panehop</code>
+        </p>
+      </section>
+
+      <main id="app-content" class="app-content hidden">
+        <nav class="nav-strip">
+          <div>
+            <p class="nav-label">Windows</p>
+            <div id="window-tabs" class="tab-row"></div>
+          </div>
+          <div>
+            <p class="nav-label">Panes</p>
+            <div id="pane-tabs" class="tab-row"></div>
+          </div>
+        </nav>
+
+        <section class="terminal-panel">
+          <div class="terminal-meta">
+            <span id="pane-title">Pane</span>
+            <span id="pane-subtitle"></span>
+          </div>
+          <div id="terminal" class="terminal-mount"></div>
+        </section>
+      </main>
+
+      <footer id="controls" class="control-bar hidden">
+        <button data-input="\u001b">Esc</button>
+        <button data-input="\t">Tab</button>
+        <button data-input="\u0003">Ctrl+C</button>
+        <button data-input="\u000c">Ctrl+L</button>
+        <button data-input="\u001b[A">↑</button>
+        <button data-input="\u001b[D">←</button>
+        <button data-input="\u001b[B">↓</button>
+        <button data-input="\u001b[C">→</button>
+        <button data-input="\r">Enter</button>
+      </footer>
+    </div>
+
+    <script src="/vendor/xterm/lib/xterm.js"></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
