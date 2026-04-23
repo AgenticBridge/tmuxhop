@@ -1,5 +1,5 @@
 /**
- * PaneHop sessions controller hook.
+ * tmuxhop sessions controller hook.
  *
  * Purpose: own session/window/pane loading, selection state, and the page
  * visibility state derived from tmux availability.

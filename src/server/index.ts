@@ -1,5 +1,5 @@
 /**
- * PaneHop server entrypoint.
+ * tmuxhop server entrypoint.
  *
  * Purpose: create the HTTP server, serve static assets, expose API routes, and
  * manage the WebSocket lifecycle for pane attachment.
@@ -307,9 +307,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const server = createServer();
   server.listen(PORT, HOST, () => {
     if (HOST === "0.0.0.0") {
-      console.log(`PaneHop listening on all interfaces at port ${PORT}`);
+      console.log(`tmuxhop listening on all interfaces at port ${PORT}`);
     }
-    console.log(`PaneHop listening on http://${HOST}:${PORT}`);
+    console.log(`tmuxhop listening on http://${HOST}:${PORT}`);
     console.log(`Using tmux session: ${DEFAULT_SESSION}`);
   });
 }

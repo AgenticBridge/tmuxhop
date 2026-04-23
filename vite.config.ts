@@ -1,5 +1,5 @@
 /**
- * PaneHop client Vite build configuration.
+ * tmuxhop client Vite build configuration.
  *
  * Purpose: build the frontend from `src/client/` into `dist/client` while
  * keeping the Node backend routes unchanged while allowing page entry HTML to

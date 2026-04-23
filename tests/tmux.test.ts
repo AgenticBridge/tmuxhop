@@ -1,5 +1,5 @@
 /**
- * PaneHop tmux adapter tests.
+ * tmuxhop tmux adapter tests.
  *
  * Purpose: verify tmux parsing and backend selection behavior in isolation from
  * browser code.
@@ -78,10 +78,10 @@ describe("pickDefaultSessionName", () => {
   it("prefers the configured default session when present", () => {
     const sessions: SessionSummary[] = [
       { name: "notes", attached: false, windows: 1 },
-      { name: "panehop", attached: true, windows: 2 },
+      { name: "tmuxhop", attached: true, windows: 2 },
     ];
 
-    expect(pickDefaultSessionName(sessions, "panehop")).toBe("panehop");
+    expect(pickDefaultSessionName(sessions, "tmuxhop")).toBe("tmuxhop");
   });
 
   it("falls back to the first session when the preferred one is missing", () => {
@@ -90,7 +90,7 @@ describe("pickDefaultSessionName", () => {
       { name: "work", attached: true, windows: 3 },
     ];
 
-    expect(pickDefaultSessionName(sessions, "panehop")).toBe("notes");
+    expect(pickDefaultSessionName(sessions, "tmuxhop")).toBe("notes");
   });
 });
 

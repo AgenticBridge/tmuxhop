@@ -1,5 +1,5 @@
 /**
- * PaneHop server pane stream bridge.
+ * tmuxhop server pane stream bridge.
  *
  * Purpose: bridge a live tmux pane into incremental terminal output suitable
  * for the browser while keeping the pane itself as the source of truth.

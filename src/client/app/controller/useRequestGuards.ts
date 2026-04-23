@@ -1,5 +1,5 @@
 /**
- * PaneHop controller request guards.
+ * tmuxhop controller request guards.
  *
  * Purpose: provide mounted-state tracking, in-flight request sequencing, and a
  * single async error path for controller tasks.

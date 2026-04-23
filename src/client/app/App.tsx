@@ -1,5 +1,5 @@
 /**
- * PaneHop React application shell.
+ * tmuxhop React application shell.
  *
  * Purpose: compose the top-level browser UI using the app controller and
  * presentational client components.
@@ -33,7 +33,7 @@ export function App() {
         <h2>No tmux session found</h2>
         <p>
           Start or select a session locally, then reload this page: <code>tmux ls</code> or{" "}
-          <code>tmux new -As panehop</code>
+          <code>tmux new -As tmuxhop</code>
         </p>
       </section>
 

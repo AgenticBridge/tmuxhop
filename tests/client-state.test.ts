@@ -1,5 +1,5 @@
 /**
- * PaneHop client state tests.
+ * tmuxhop client state tests.
  *
  * Purpose: verify UI-facing selection helpers using backend protocol data as
  * input.
@@ -54,7 +54,7 @@ const windows: WindowInfo[] = [
 ];
 
 const sessions: SessionSummary[] = [
-  { name: "panehop", attached: false, windows: 2 },
+  { name: "tmuxhop", attached: false, windows: 2 },
   { name: "notes", attached: true, windows: 1 },
 ];
 
@@ -64,7 +64,7 @@ describe("getInitialSessionName", () => {
   });
 
   it("falls back to the first listed session", () => {
-    expect(getInitialSessionName(sessions, "missing")).toBe("panehop");
+    expect(getInitialSessionName(sessions, "missing")).toBe("tmuxhop");
   });
 });
 

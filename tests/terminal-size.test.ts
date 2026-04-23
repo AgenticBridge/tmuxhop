@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal sizing tests.
+ * tmuxhop terminal sizing tests.
  *
  * Purpose: verify fitted terminal size normalization independently from the DOM
  * wiring in the app shell.

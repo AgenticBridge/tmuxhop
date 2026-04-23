@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * PaneHop app controller orchestration tests.
+ * tmuxhop app controller orchestration tests.
  *
  * Purpose: verify that the top-level controller coordinates sessions and pane
  * transport in the expected order.
@@ -30,18 +30,18 @@ vi.mock("../src/client/app/controller/useSessions.js", () => ({
   useSessions: () => ({
     latestStateRef: {
       current: {
-        selectedSessionName: "panehop",
+        selectedSessionName: "tmuxhop",
         selectedWindowId: "@1",
         selectedPaneId: "%1",
         windows: [],
       },
     },
     selectedPaneId: "%1",
-    selectedSessionName: "panehop",
+    selectedSessionName: "tmuxhop",
     selectedWindowId: "@1",
     selectedWindowPanes: [],
-    sessionTitle: "panehop",
-    sessions: [{ name: "panehop", attached: true, windows: 1 }],
+    sessionTitle: "tmuxhop",
+    sessions: [{ name: "tmuxhop", attached: true, windows: 1 }],
     showApp: true,
     showControls: true,
     showEmptyState: false,

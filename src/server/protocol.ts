@@ -1,5 +1,5 @@
 /**
- * PaneHop backend protocol definitions.
+ * tmuxhop backend protocol definitions.
  *
  * Purpose: define the canonical HTTP and WebSocket shapes emitted and accepted
  * by the backend.

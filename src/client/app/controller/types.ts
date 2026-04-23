@@ -1,5 +1,5 @@
 /**
- * PaneHop app controller types.
+ * tmuxhop app controller types.
  *
  * Purpose: define the controller contract and internal state shapes shared
  * across controller modules.

@@ -1,5 +1,5 @@
 /**
- * PaneHop app controller hook.
+ * tmuxhop app controller hook.
  *
  * Purpose: own the app-shell orchestration layer, including session loading,
  * selection transitions, websocket attachment, reconnect policy, and font

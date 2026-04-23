@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal panel.
+ * tmuxhop terminal panel.
  *
  * Purpose: render the terminal mount region without owning terminal runtime
  * behavior.

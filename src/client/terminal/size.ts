@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal sizing helpers.
+ * tmuxhop terminal sizing helpers.
  *
  * Purpose: read the fitted xterm row and column counts after the browser has
  * laid out the viewport and keep the server-side tmux client in sync.

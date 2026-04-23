@@ -1,5 +1,5 @@
 /**
- * PaneHop utility bar.
+ * tmuxhop utility bar.
  *
  * Purpose: render the compact top utility row with navigation, connection, and
  * quick terminal status actions.

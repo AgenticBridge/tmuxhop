@@ -1,5 +1,5 @@
 /**
- * PaneHop pane stream tests.
+ * tmuxhop pane stream tests.
  *
  * Purpose: verify tmux control-mode parsing helpers that back the live pane
  * stream bridge.

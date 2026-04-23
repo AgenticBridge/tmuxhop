@@ -1,5 +1,5 @@
 /**
- * PaneHop server integration tests.
+ * tmuxhop server integration tests.
  *
  * Purpose: verify HTTP routes and websocket pane behavior using injected server
  * dependencies instead of a live tmux process.
@@ -61,13 +61,13 @@ class MockSocket extends EventEmitter implements PaneSocketLike {
 }
 
 const sessions: SessionSummary[] = [
-  { name: "panehop", attached: true, windows: 2 },
+  { name: "tmuxhop", attached: true, windows: 2 },
   { name: "notes", attached: false, windows: 1 },
 ];
 
 const sessionState: SessionState = {
   exists: true,
-  sessionName: "panehop",
+  sessionName: "tmuxhop",
   activePaneId: "%1",
   windows: [
     {
@@ -116,7 +116,7 @@ describe("createServer", () => {
 
     expect(payload).toEqual({
       sessions,
-      defaultSessionName: "panehop",
+      defaultSessionName: "tmuxhop",
     });
   });
 
@@ -124,7 +124,7 @@ describe("createServer", () => {
     const { deps } = makeDependencies();
     const payload = await buildWindowsResponse(deps, "notes");
 
-    expect(payload.sessionName).toBe("panehop");
+    expect(payload.sessionName).toBe("tmuxhop");
     expect(deps.getSessionState).toHaveBeenCalledWith("notes");
   });
 

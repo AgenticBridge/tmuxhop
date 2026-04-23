@@ -1,5 +1,5 @@
 /**
- * PaneHop scope navigation.
+ * tmuxhop scope navigation.
  *
  * Purpose: render the two-level session/window/pane navigator above the
  * terminal.

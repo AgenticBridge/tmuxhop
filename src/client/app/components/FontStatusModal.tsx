@@ -1,5 +1,5 @@
 /**
- * PaneHop font status modal.
+ * tmuxhop font status modal.
  *
  * Purpose: render the higher-level modal that explains terminal font coverage
  * and offers a refresh action.

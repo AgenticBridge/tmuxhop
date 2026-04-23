@@ -1,5 +1,5 @@
 /**
- * PaneHop font compatibility tests.
+ * tmuxhop font compatibility tests.
  *
  * Purpose: verify recommendation logic for browser font coverage without
  * depending on DOM canvas APIs.

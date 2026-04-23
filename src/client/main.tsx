@@ -1,5 +1,5 @@
 /**
- * PaneHop browser entrypoint.
+ * tmuxhop browser entrypoint.
  *
  * Purpose: mount the React application into the static `app.html` shell.
  *

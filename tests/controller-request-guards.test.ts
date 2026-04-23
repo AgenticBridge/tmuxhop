@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * PaneHop request guard tests.
+ * tmuxhop request guard tests.
  *
  * Purpose: verify mounted-state protection, request invalidation, and shared
  * async error handling used by the client controller layer.

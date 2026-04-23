@@ -1,5 +1,5 @@
 /**
- * PaneHop client UI definition tests.
+ * tmuxhop client UI definition tests.
  *
  * Purpose: verify static UI configuration used by the React frontend.
  *

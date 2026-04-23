@@ -1,5 +1,5 @@
 /**
- * PaneHop app UI definitions.
+ * tmuxhop app UI definitions.
  *
  * Purpose: hold stable UI configuration and labels owned by the React app
  * shell.

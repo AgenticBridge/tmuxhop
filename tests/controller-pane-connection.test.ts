@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * PaneHop pane connection controller tests.
+ * tmuxhop pane connection controller tests.
  *
  * Purpose: verify websocket transport behavior for pane attach, streaming, and
  * reconnect scheduling.
@@ -73,7 +73,7 @@ describe("usePaneConnection", () => {
       usePaneConnection({
         latestStateRef: {
           current: {
-            selectedSessionName: "panehop",
+            selectedSessionName: "tmuxhop",
             selectedWindowId: "@1",
             selectedPaneId: "%1",
             windows: [],
@@ -108,7 +108,7 @@ describe("usePaneConnection", () => {
       usePaneConnection({
         latestStateRef: {
           current: {
-            selectedSessionName: "panehop",
+            selectedSessionName: "tmuxhop",
             selectedWindowId: "@1",
             selectedPaneId: "%1",
             windows: [],
@@ -147,7 +147,7 @@ describe("usePaneConnection", () => {
       usePaneConnection({
         latestStateRef: {
           current: {
-            selectedSessionName: "panehop",
+            selectedSessionName: "tmuxhop",
             selectedWindowId: null,
             selectedPaneId: null,
             windows: [],
@@ -176,7 +176,7 @@ describe("usePaneConnection", () => {
       usePaneConnection({
         latestStateRef: {
           current: {
-            selectedSessionName: "panehop",
+            selectedSessionName: "tmuxhop",
             selectedWindowId: "@1",
             selectedPaneId: "%1",
             windows: [],
@@ -210,7 +210,7 @@ describe("usePaneConnection", () => {
       usePaneConnection({
         latestStateRef: {
           current: {
-            selectedSessionName: "panehop",
+            selectedSessionName: "tmuxhop",
             selectedWindowId: "@1",
             selectedPaneId: "%1",
             windows: [],

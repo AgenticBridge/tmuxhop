@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal runtime loader.
+ * tmuxhop terminal runtime loader.
  *
  * Purpose: lazy-load the xterm runtime so the main React application shell can
  * stay smaller and the heavy terminal code can ship in a separate chunk.

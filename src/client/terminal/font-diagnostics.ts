@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal font diagnostics.
+ * tmuxhop terminal font diagnostics.
  *
  * Purpose: detect whether the browser can render terminal-critical glyph sets
  * and produce actionable font recommendations for the current terminal UI.
@@ -98,7 +98,7 @@ export function detectFontCompatibility(
         nerdFont: false,
       }),
       details:
-        "PaneHop could not run the browser font probe. Install a Nerd Font if prompt icons still look wrong.",
+        "tmuxhop could not run the browser font probe. Install a Nerd Font if prompt icons still look wrong.",
     };
   }
 

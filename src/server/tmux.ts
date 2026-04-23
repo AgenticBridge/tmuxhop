@@ -1,5 +1,5 @@
 /**
- * PaneHop server tmux adapter.
+ * tmuxhop server tmux adapter.
  *
  * Purpose: isolate all direct interaction with the local `tmux` process and
  * translate tmux state into backend protocol shapes.
@@ -19,9 +19,12 @@ import type {
 
 const execFileAsync = promisify(execFile);
 
-export const DEFAULT_SESSION = process.env.PANEHOP_SESSION || "panehop";
+export const DEFAULT_SESSION =
+  process.env.TMUXHOP_SESSION || "tmuxhop";
 export const TMUX_BIN = process.env.TMUX_BIN || "/opt/homebrew/bin/tmux";
-export const DEFAULT_SCROLLBACK_LINES = Number(process.env.PANEHOP_SCROLLBACK_LINES || 1000);
+export const DEFAULT_SCROLLBACK_LINES = Number(
+  process.env.TMUXHOP_SCROLLBACK_LINES || 1000,
+);
 const FIELD_SEPARATOR = "\t";
 const ROW_SEPARATOR = "\n";
 

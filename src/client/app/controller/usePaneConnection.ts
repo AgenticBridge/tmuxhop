@@ -1,5 +1,5 @@
 /**
- * PaneHop pane connection hook.
+ * tmuxhop pane connection hook.
  *
  * Purpose: own the websocket attach/reconnect transport for the currently
  * selected pane while delegating tmux data selection to the sessions layer.

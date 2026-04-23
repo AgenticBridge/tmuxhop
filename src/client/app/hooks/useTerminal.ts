@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal lifecycle hook.
+ * tmuxhop terminal lifecycle hook.
  *
  * Purpose: own xterm runtime loading, mount lifecycle, browser resize
  * observation, and terminal read/write helpers for the app shell.

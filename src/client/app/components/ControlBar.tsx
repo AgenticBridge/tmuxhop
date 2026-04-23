@@ -1,5 +1,5 @@
 /**
- * PaneHop terminal control bar.
+ * tmuxhop terminal control bar.
  *
  * Purpose: render mobile-friendly terminal shortcut buttons below the terminal.
  *

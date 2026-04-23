@@ -1,5 +1,5 @@
 /**
- * PaneHop client selection helpers.
+ * tmuxhop client selection helpers.
  *
  * Purpose: derive UI-facing selection and label state from backend protocol
  * data without touching the DOM.

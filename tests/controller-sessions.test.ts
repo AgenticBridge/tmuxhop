@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * PaneHop sessions controller tests.
+ * tmuxhop sessions controller tests.
  *
  * Purpose: verify the session/window loading controller, including empty-state
  * handling, preserved selection, and stale-request suppression.
@@ -64,7 +64,7 @@ describe("useSessions", () => {
       vi.fn(async () =>
         mockJsonResponse({
           exists: false,
-          sessionName: "panehop",
+          sessionName: "tmuxhop",
           windows: [],
           activePaneId: null,
         }),
@@ -77,7 +77,7 @@ describe("useSessions", () => {
     });
 
     await act(async () => {
-      await result.current.loadWindowsForSelectedSession({ sessionName: "panehop" });
+      await result.current.loadWindowsForSelectedSession({ sessionName: "tmuxhop" });
     });
 
     expect(result.current.showEmptyState).toBe(true);
@@ -91,7 +91,7 @@ describe("useSessions", () => {
     const onStatusChange = vi.fn();
     const firstPayload = {
       exists: true,
-      sessionName: "panehop",
+      sessionName: "tmuxhop",
       activePaneId: "%1",
       windows: [
         {
@@ -139,12 +139,12 @@ describe("useSessions", () => {
     });
 
     await act(async () => {
-      await result.current.loadWindowsForSelectedSession({ sessionName: "panehop" });
+      await result.current.loadWindowsForSelectedSession({ sessionName: "tmuxhop" });
     });
     await act(async () => {
       result.current.selectPane("%2");
       await result.current.loadWindowsForSelectedSession({
-        sessionName: "panehop",
+        sessionName: "tmuxhop",
         preserveSelection: true,
       });
     });
