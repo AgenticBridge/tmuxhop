@@ -151,9 +151,11 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
   let keyboardInteractionActive = false;
   let scrollTimer: number | null = null;
   let rafId: number | null = null;
+  let lockTimer: number | null = null;
   const visualViewport = window.visualViewport;
   const body = document.body;
-  const activeClassName = "app-page--terminal-scroll-active";
+  const lockClassName = "app-page--keyboard-scroll-locked";
+  let removeTouchMoveLock: (() => void) | null = null;
 
   const flushScheduledScroll = () => {
     if (scrollTimer !== null) {
@@ -164,23 +166,62 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
       window.cancelAnimationFrame(rafId);
       rafId = null;
     }
+    if (lockTimer !== null) {
+      window.clearTimeout(lockTimer);
+      lockTimer = null;
+    }
   };
 
-  const armViewportAssist = (keyboardInset = 0) => {
-    body.classList.add(activeClassName);
-    body.style.setProperty("--terminal-scroll-offset", `${keyboardInset}px`);
+  const lockPageScroll = () => {
+    if (removeTouchMoveLock) {
+      return;
+    }
+
+    body.classList.add(lockClassName);
+    const viewport = mount.querySelector<HTMLElement>(".xterm-viewport");
+    const handleTouchMove = (event: TouchEvent) => {
+      if (viewport && event.target instanceof Node && viewport.contains(event.target)) {
+        return;
+      }
+
+      event.preventDefault();
+    };
+
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    removeTouchMoveLock = () => {
+      document.removeEventListener("touchmove", handleTouchMove);
+      removeTouchMoveLock = null;
+    };
   };
 
-  const scrollTerminalIntoView = (delayMs = 0, keyboardInset = 0) => {
+  const unlockPageScroll = () => {
+    if (!removeTouchMoveLock) {
+      return;
+    }
+
+    removeTouchMoveLock();
+    body.classList.remove(lockClassName);
+  };
+
+  const revealTerminalInViewport = (delayMs = 0, _keyboardInset = 0) => {
     flushScheduledScroll();
-    armViewportAssist(keyboardInset);
     scrollTimer = window.setTimeout(() => {
       scrollTimer = null;
       rafId = window.requestAnimationFrame(() => {
         rafId = null;
-        mount.scrollIntoView({
-          block: "end",
-          inline: "nearest",
+        const viewportHeight = visualViewport?.height ?? window.innerHeight;
+        const rect = mount.getBoundingClientRect();
+        const controls = document.getElementById("controls");
+        const controlsRect = controls?.classList.contains("hidden") ? null : controls?.getBoundingClientRect();
+        const contentBottom = Math.max(rect.bottom, controlsRect?.bottom ?? 0);
+        const targetBottom = viewportHeight - 12;
+        const delta = contentBottom - targetBottom;
+        if (delta <= 0) {
+          return;
+        }
+
+        window.scrollTo({
+          top: Math.max(0, window.scrollY + delta),
           behavior: delayMs > 0 ? "smooth" : "auto",
         });
       });
@@ -189,14 +230,12 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
 
   const activateViewportAssist = () => {
     keyboardInteractionActive = true;
-    scrollTerminalIntoView(24, getViewportKeyboardInset());
   };
 
   const deactivateViewportAssist = () => {
     keyboardInteractionActive = false;
-    body.classList.remove(activeClassName);
-    body.style.removeProperty("--terminal-scroll-offset");
     flushScheduledScroll();
+    unlockPageScroll();
   };
 
   const handleViewportResize = () => {
@@ -205,7 +244,13 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
     }
 
     const keyboardInset = getViewportKeyboardInset();
-    scrollTerminalIntoView(48, keyboardInset);
+    revealTerminalInViewport(48, keyboardInset);
+    if (keyboardInset > 0) {
+      lockTimer = window.setTimeout(() => {
+        lockTimer = null;
+        lockPageScroll();
+      }, 240);
+    }
   };
 
   const handlePointerDown = (event: PointerEvent) => {

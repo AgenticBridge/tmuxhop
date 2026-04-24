@@ -29,12 +29,6 @@ body.app-page {
   overflow: hidden;
 }
 
-body.app-page.app-page--terminal-scroll-active {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: var(--terminal-scroll-offset, 0px);
-}
-
 code,
 .tab-button,
 button,

@@ -131,12 +131,17 @@ describe("useTerminal", () => {
     expect(resize).toHaveBeenCalledWith(90, 30);
   });
 
-  it("scrolls the terminal into view after touch interaction and viewport resize", async () => {
+  it("locks page scrolling after keyboard resize while keeping the terminal revealed", async () => {
     vi.useFakeTimers();
     fontDiagnosticsMock.ensureBundledTerminalFontReady.mockResolvedValueOnce(undefined);
     Object.defineProperty(window, "innerHeight", {
       configurable: true,
       value: 844,
+    });
+    let currentScrollY = 20;
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      get: () => currentScrollY,
     });
 
     const visualViewportListeners = new Map<string, EventListener>();
@@ -181,10 +186,12 @@ describe("useTerminal", () => {
       },
     });
 
-    const scrollIntoViewSpy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
-      configurable: true,
-      value: scrollIntoViewSpy,
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation((value: number | ScrollToOptions) => {
+      if (typeof value === "number") {
+        currentScrollY = value;
+        return;
+      }
+      currentScrollY = value.top ?? currentScrollY;
     });
 
     const { container } = render(<TerminalHarness />);
@@ -192,35 +199,67 @@ describe("useTerminal", () => {
     await Promise.resolve();
 
     const mount = container.firstElementChild as HTMLDivElement;
+    const controls = document.createElement("footer");
+    controls.id = "controls";
+    Object.defineProperty(controls, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        top: 840,
+        bottom: 940,
+        left: 0,
+        right: 0,
+        width: 0,
+        height: 100,
+        x: 0,
+        y: 840,
+        toJSON: () => ({}),
+      }),
+    });
+    document.body.appendChild(controls);
+    Object.defineProperty(mount, "getBoundingClientRect", {
+      configurable: true,
+      value: () => ({
+        top: 120,
+        bottom: 880,
+        left: 0,
+        right: 0,
+        width: 0,
+        height: 760,
+        x: 0,
+        y: 120,
+        toJSON: () => ({}),
+      }),
+    });
+
     fireEvent.touchStart(mount);
-    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(true);
+    expect(document.body.classList.contains("app-page--keyboard-scroll-locked")).toBe(false);
     await vi.advanceTimersByTimeAsync(24);
 
-    expect(scrollIntoViewSpy).toHaveBeenCalledWith({
-      block: "end",
-      inline: "nearest",
-      behavior: "smooth",
-    });
-    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(true);
-    expect(document.body.style.getPropertyValue("--terminal-scroll-offset")).toBe("300px");
+    expect(scrollToSpy).not.toHaveBeenCalled();
+    expect(document.body.classList.contains("app-page--keyboard-scroll-locked")).toBe(false);
 
-    scrollIntoViewSpy.mockClear();
+    scrollToSpy.mockClear();
     visualViewportListeners.get("resize")?.(new Event("resize"));
     await vi.advanceTimersByTimeAsync(48);
 
-    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(true);
-    expect(document.body.style.getPropertyValue("--terminal-scroll-offset")).toBe("300px");
-    expect(scrollIntoViewSpy).toHaveBeenCalledWith({
-      block: "end",
-      inline: "nearest",
+    expect(scrollToSpy).toHaveBeenCalledWith({
+      top: 428,
       behavior: "smooth",
     });
+    await vi.advanceTimersByTimeAsync(240);
+    expect(document.body.classList.contains("app-page--keyboard-scroll-locked")).toBe(true);
+    expect(document.body.style.getPropertyValue("--terminal-locked-scroll-top")).toBe("");
+
+    const outsideTouchMove = new Event("touchmove", { cancelable: true });
+    document.dispatchEvent(outsideTouchMove);
+    expect(outsideTouchMove.defaultPrevented).toBe(true);
 
     fireEvent.focusOut(mount);
-    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(false);
-    expect(document.body.style.getPropertyValue("--terminal-scroll-offset")).toBe("");
-
+    expect(document.body.classList.contains("app-page--keyboard-scroll-locked")).toBe(false);
+    expect(document.body.style.getPropertyValue("--terminal-locked-scroll-top")).toBe("");
+    controls.remove();
     requestAnimationFrameSpy.mockRestore();
+    scrollToSpy.mockRestore();
   });
 
   it("ignores mouse pointer interaction for the mobile viewport assist", async () => {
@@ -246,11 +285,7 @@ describe("useTerminal", () => {
       },
     });
 
-    const scrollIntoViewSpy = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
-      configurable: true,
-      value: scrollIntoViewSpy,
-    });
+    const scrollToSpy = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
 
     const { container } = render(<TerminalHarness />);
     await vi.advanceTimersByTimeAsync(250);
@@ -260,7 +295,8 @@ describe("useTerminal", () => {
     fireEvent.pointerDown(mount, { pointerType: "mouse" });
     await vi.advanceTimersByTimeAsync(24);
 
-    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(false);
-    expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+    expect(scrollToSpy).not.toHaveBeenCalled();
+    scrollToSpy.mockRestore();
   });
+
 });
