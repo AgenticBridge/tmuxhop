@@ -166,8 +166,14 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
     }
   };
 
-  const scrollTerminalIntoView = (delayMs = 0) => {
+  const armViewportAssist = (keyboardInset = 0) => {
+    body.classList.add(activeClassName);
+    body.style.setProperty("--terminal-scroll-offset", `${keyboardInset}px`);
+  };
+
+  const scrollTerminalIntoView = (delayMs = 0, keyboardInset = 0) => {
     flushScheduledScroll();
+    armViewportAssist(keyboardInset);
     scrollTimer = window.setTimeout(() => {
       scrollTimer = null;
       rafId = window.requestAnimationFrame(() => {
@@ -183,8 +189,7 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
 
   const activateViewportAssist = () => {
     keyboardInteractionActive = true;
-    body.classList.add(activeClassName);
-    scrollTerminalIntoView(24);
+    scrollTerminalIntoView(24, getViewportKeyboardInset());
   };
 
   const deactivateViewportAssist = () => {
@@ -200,8 +205,7 @@ function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
     }
 
     const keyboardInset = getViewportKeyboardInset();
-    body.style.setProperty("--terminal-scroll-offset", `${keyboardInset}px`);
-    scrollTerminalIntoView(48);
+    scrollTerminalIntoView(48, keyboardInset);
   };
 
   const handlePointerDown = (event: PointerEvent) => {

@@ -201,11 +201,14 @@ describe("useTerminal", () => {
       inline: "nearest",
       behavior: "smooth",
     });
+    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(true);
+    expect(document.body.style.getPropertyValue("--terminal-scroll-offset")).toBe("300px");
 
     scrollIntoViewSpy.mockClear();
     visualViewportListeners.get("resize")?.(new Event("resize"));
     await vi.advanceTimersByTimeAsync(48);
 
+    expect(document.body.classList.contains("app-page--terminal-scroll-active")).toBe(true);
     expect(document.body.style.getPropertyValue("--terminal-scroll-offset")).toBe("300px");
     expect(scrollIntoViewSpy).toHaveBeenCalledWith({
       block: "end",
