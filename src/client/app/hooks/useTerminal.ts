@@ -44,6 +44,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
 
     let cancelled = false;
     let resizeObserver: ResizeObserver | null = null;
+    let activeViewportAssistCleanup: (() => void) | null = null;
 
     const handleWindowResize = () => {
       syncTerminalSize();
@@ -65,6 +66,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
       terminalRef.current = terminal;
       fitAddonRef.current = fitAddon;
       terminal.onData(onInput);
+      activeViewportAssistCleanup = installTerminalViewportAssist(mount);
 
       resizeObserver = new ResizeObserver(() => {
         syncTerminalSize();
@@ -86,6 +88,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
 
     return () => {
       cancelled = true;
+      activeViewportAssistCleanup?.();
       resizeObserver?.disconnect();
       window.removeEventListener("resize", handleWindowResize);
       terminalRef.current?.dispose();
@@ -142,4 +145,95 @@ function waitForStartupFontBudget() {
   return new Promise<void>((resolve) => {
     window.setTimeout(resolve, 250);
   });
+}
+
+function installTerminalViewportAssist(mount: HTMLDivElement): () => void {
+  let keyboardInteractionActive = false;
+  let scrollTimer: number | null = null;
+  let rafId: number | null = null;
+  const visualViewport = window.visualViewport;
+  const body = document.body;
+  const activeClassName = "app-page--terminal-scroll-active";
+
+  const flushScheduledScroll = () => {
+    if (scrollTimer !== null) {
+      window.clearTimeout(scrollTimer);
+      scrollTimer = null;
+    }
+    if (rafId !== null) {
+      window.cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  };
+
+  const scrollTerminalIntoView = (delayMs = 0) => {
+    flushScheduledScroll();
+    scrollTimer = window.setTimeout(() => {
+      scrollTimer = null;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        mount.scrollIntoView({
+          block: "end",
+          inline: "nearest",
+          behavior: delayMs > 0 ? "smooth" : "auto",
+        });
+      });
+    }, delayMs);
+  };
+
+  const activateViewportAssist = () => {
+    keyboardInteractionActive = true;
+    body.classList.add(activeClassName);
+    scrollTerminalIntoView(24);
+  };
+
+  const deactivateViewportAssist = () => {
+    keyboardInteractionActive = false;
+    body.classList.remove(activeClassName);
+    body.style.removeProperty("--terminal-scroll-offset");
+    flushScheduledScroll();
+  };
+
+  const handleViewportResize = () => {
+    if (!keyboardInteractionActive) {
+      return;
+    }
+
+    const keyboardInset = getViewportKeyboardInset();
+    body.style.setProperty("--terminal-scroll-offset", `${keyboardInset}px`);
+    scrollTerminalIntoView(48);
+  };
+
+  const handlePointerDown = (event: PointerEvent) => {
+    if (event.pointerType !== "touch") {
+      return;
+    }
+
+    activateViewportAssist();
+  };
+
+  mount.addEventListener("touchstart", activateViewportAssist, { passive: true });
+  mount.addEventListener("pointerdown", handlePointerDown);
+  mount.addEventListener("focusout", deactivateViewportAssist);
+  visualViewport?.addEventListener("resize", handleViewportResize);
+
+  return () => {
+    deactivateViewportAssist();
+    mount.removeEventListener("touchstart", activateViewportAssist);
+    mount.removeEventListener("pointerdown", handlePointerDown);
+    mount.removeEventListener("focusout", deactivateViewportAssist);
+    visualViewport?.removeEventListener("resize", handleViewportResize);
+  };
+}
+
+function getViewportKeyboardInset(): number {
+  const visualViewport = window.visualViewport;
+  if (!visualViewport) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.round(window.innerHeight - (visualViewport.height + visualViewport.offsetTop)),
+  );
 }
