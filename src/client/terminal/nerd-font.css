@@ -2,14 +2,14 @@
  * tmuxhop bundled terminal Nerd Font faces.
  *
  * Purpose: provide a repo-owned font-family alias for the vendored
- * JetBrains Mono Nerd Font Mono files used by the browser terminal.
+ * IosevkaTerm Nerd Font Mono files used by the browser terminal.
  *
  * Boundary: client-only. This stylesheet should be imported only by the
  * terminal runtime entrypoint.
  */
 @font-face {
   font-family: "Tmuxhop Terminal Nerd Font";
-  src: url("./fonts/JetBrainsMonoNerdFontMono-Regular.ttf") format("truetype");
+  src: url("./fonts/IosevkaTermNerdFontMono-Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -17,7 +17,7 @@
 
 @font-face {
   font-family: "Tmuxhop Terminal Nerd Font";
-  src: url("./fonts/JetBrainsMonoNerdFontMono-Bold.ttf") format("truetype");
+  src: url("./fonts/IosevkaTermNerdFontMono-Bold.ttf") format("truetype");
   font-style: normal;
   font-weight: 700;
   font-display: swap;

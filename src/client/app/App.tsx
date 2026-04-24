@@ -19,9 +19,11 @@ export function App() {
   return (
     <>
       <UtilityBar
+        fontMode={controller.fontMode}
         fontReport={controller.fontReport}
         onCreatePath={controller.onCreatePath}
         onDeletePath={controller.onDeletePath}
+        onFontModeChange={controller.onFontModeChange}
         onReconnect={controller.onReconnect}
         onRefreshFontReport={controller.refreshFontReport}
         onRenamePath={controller.onRenamePath}
@@ -52,6 +54,7 @@ export function App() {
       <ControlBar
         controls={CONTROL_BUTTONS}
         onShortcut={controller.onShortcut}
+        onTextInput={controller.onTextInput}
         showControls={controller.showControls}
       />
     </>

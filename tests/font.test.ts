@@ -60,7 +60,7 @@ describe("buildFontCompatibilityReport", () => {
       headline: "Terminal borders may render incorrectly",
       details:
         "Even with the bundled Nerd Font, box-drawing glyphs are missing, so pane borders and text UIs can look broken in the browser.",
-      recommendedFonts: ["JetBrainsMono Nerd Font", "JetBrains Mono", "Menlo"],
+      recommendedFonts: ["IosevkaTerm Nerd Font", "Iosevka Term", "Menlo"],
     });
   });
 
@@ -77,9 +77,9 @@ describe("buildFontCompatibilityReport", () => {
       details:
         "The bundled Nerd Font glyphs are not available in this browser session, so themed prompts like oh-my-zsh may show empty boxes or fallback glyphs.",
       recommendedFonts: [
+        "IosevkaTerm Nerd Font",
         "JetBrainsMono Nerd Font",
         "MesloLGS NF",
-        "CaskaydiaCove Nerd Font",
       ],
     });
   });

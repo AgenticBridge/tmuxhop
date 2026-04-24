@@ -28,7 +28,7 @@ const PROBE_CANVAS_SIZE = 48;
 const PROBE_FONT_SIZE = 28;
 
 export const TERMINAL_FONT_STACK =
-  '"Tmuxhop Terminal Nerd Font", "JetBrainsMono Nerd Font", "MesloLGS NF", "SauceCodePro Nerd Font", "CaskaydiaCove Nerd Font", "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace';
+  '"Tmuxhop Terminal Nerd Font", "IosevkaTerm Nerd Font Mono", "IosevkaTerm Nerd Font", "JetBrainsMono Nerd Font", "MesloLGS NF", "SauceCodePro Nerd Font", "CaskaydiaCove Nerd Font", "Iosevka Term", "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace';
 
 export const FONT_PROBE_SAMPLE = "┌─┐ ││ └─┘       ";
 
@@ -76,8 +76,8 @@ export function buildFontCompatibilityReport(
 
   const recommendedFonts =
     missing.includes("powerline") || missing.includes("nerdFont")
-      ? ["JetBrainsMono Nerd Font", "MesloLGS NF", "CaskaydiaCove Nerd Font"]
-      : ["JetBrainsMono Nerd Font", "JetBrains Mono", "Menlo"];
+      ? ["IosevkaTerm Nerd Font", "JetBrainsMono Nerd Font", "MesloLGS NF"]
+      : ["IosevkaTerm Nerd Font", "Iosevka Term", "Menlo"];
 
   if (missing.length === 1 && missing[0] === "boxDrawing") {
     return {

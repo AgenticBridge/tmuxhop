@@ -21,9 +21,15 @@ import {
   createPendingFontCompatibilityReport,
   detectFontCompatibility,
   ensureBundledTerminalFontReady,
-  TERMINAL_FONT_STACK,
   type FontCompatibilityReport,
 } from "../../terminal/font-diagnostics.js";
+import {
+  getTerminalFontStack,
+  loadTerminalFontMode,
+  saveTerminalFontMode,
+  terminalFontModeNeedsBundledAsset,
+  type TerminalFontMode,
+} from "../../terminal/settings.js";
 import { useTerminal } from "../hooks/useTerminal.js";
 import type { NavScope, StatusState, StatusTone } from "../ui.js";
 import type { AppController } from "./types.js";
@@ -34,6 +40,7 @@ import { useSessions } from "./useSessions.js";
 export function useAppController(): AppController {
   const [navScope, setNavScope] = useState<NavScope>("panes");
   const [status, setStatus] = useState<StatusState>({ label: "Connecting", tone: "default" });
+  const [fontMode, setFontMode] = useState<TerminalFontMode>(() => loadTerminalFontMode());
   const [fontReport, setFontReport] = useState<FontCompatibilityReport>(
     createPendingFontCompatibilityReport,
   );
@@ -48,27 +55,33 @@ export function useAppController(): AppController {
     setStatus({ label, tone });
   }
 
+  const terminalFontStack = getTerminalFontStack(fontMode);
+
   async function refreshFontReport() {
-    await waitForFontProbeBudget();
-    setFontReport(detectFontCompatibility(TERMINAL_FONT_STACK));
+    if (terminalFontModeNeedsBundledAsset(fontMode)) {
+      await waitForFontProbeBudget();
+    }
+    setFontReport(detectFontCompatibility(terminalFontStack));
   }
 
   useEffect(() => {
     let cancelled = false;
 
     void (async () => {
-      await waitForFontProbeBudget();
+      if (terminalFontModeNeedsBundledAsset(fontMode)) {
+        await waitForFontProbeBudget();
+      }
       if (cancelled) {
         return;
       }
 
-      setFontReport(detectFontCompatibility(TERMINAL_FONT_STACK));
+      setFontReport(detectFontCompatibility(terminalFontStack));
     })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [fontMode, terminalFontStack]);
 
   const sessions = useSessions({
     onStatusChange: setStatusState,
@@ -148,6 +161,8 @@ export function useAppController(): AppController {
   }
 
   const terminal = useTerminal({
+    fontFamily: terminalFontStack,
+    fontMode,
     onInput: useCallback((data: string) => {
       sendSocketMessageRef.current({ type: "input", data });
     }, []),
@@ -177,6 +192,7 @@ export function useAppController(): AppController {
 
   return {
     closeFontModal: () => setFontModalOpen(false),
+    fontMode,
     fontModalOpen,
     fontReport,
     navScope,
@@ -208,6 +224,11 @@ export function useAppController(): AppController {
         preserveSelection: true,
         refreshSessions: level === "sessions",
       });
+    },
+    onFontModeChange: (mode: TerminalFontMode) => {
+      setFontMode(mode);
+      saveTerminalFontMode(mode);
+      setFontReport(createPendingFontCompatibilityReport());
     },
     onReconnect: () => {
       void reconnectSelectedPane();
@@ -256,6 +277,11 @@ export function useAppController(): AppController {
       });
     },
     onShortcut: (input: string) => paneConnection.sendSocketMessage({ type: "shortcut", data: input }),
+    onTextInput: (data: string) =>
+      paneConnection.sendSocketMessage({
+        type: "input",
+        data: `${data}\r`,
+      }),
     refreshFontReport: () => {
       void refreshFontReport();
     },

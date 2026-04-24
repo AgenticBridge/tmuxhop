@@ -348,7 +348,7 @@ h1 {
 .empty-state,
 .terminal-panel {
   border-radius: 22px;
-  padding: 16px;
+  padding: 8px;
 }
 
 .picker-sheet {
@@ -470,9 +470,21 @@ h1 {
   gap: 8px;
 }
 
+.control-sheet__section {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(24, 21, 18, 0.1);
+}
+
 .control-sheet__levels {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.control-sheet__levels--auto {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -485,6 +497,10 @@ h1 {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
+}
+
+.control-sheet__levels--auto .control-sheet__level {
+  flex: 0 0 auto;
 }
 
 .control-sheet__level[data-active="true"] {
@@ -558,13 +574,23 @@ h1 {
   background: var(--terminal);
   color: var(--terminal-ink);
   border-radius: 16px;
-  padding: 10px;
+  padding: 5px;
   overflow: hidden;
 }
 
 .terminal-mount .xterm {
   height: 100%;
-  padding: 6px 4px 6px 6px;
+  padding: 0;
+}
+
+.terminal-mount .xterm .composition-view,
+.terminal-mount .xterm .composition-view.active {
+  background: transparent;
+  color: var(--terminal-ink);
+  border-bottom: 1px solid rgba(242, 242, 235, 0.55);
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
 }
 
 .terminal-mount .xterm-viewport,
@@ -599,11 +625,38 @@ h1 {
 
 .control-bar {
   position: relative;
+  display: grid;
+  gap: 10px;
+  border-radius: 22px;
+  padding: 12px;
+}
+
+.control-bar__text-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.control-bar__text-input {
+  min-width: 0;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 11px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font: inherit;
+}
+
+.control-bar__text-button {
+  flex: 0 0 auto;
+}
+
+.control-bar__shortcuts {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  border-radius: 22px;
-  padding: 12px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -647,5 +700,11 @@ h1 {
   .control-sheet__levels,
   .control-sheet__actions {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 761px) {
+  .control-bar__text-entry {
+    display: none;
   }
 }

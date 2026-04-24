@@ -12,9 +12,16 @@ import type { FitAddon } from "@xterm/addon-fit";
 import type { Terminal } from "@xterm/xterm";
 
 import { ensureBundledTerminalFontReady } from "../../terminal/font-diagnostics.js";
-import { getTerminalDimensions, type TerminalDimensions } from "../../terminal/size.js";
+import { terminalFontModeNeedsBundledAsset, type TerminalFontMode } from "../../terminal/settings.js";
+import {
+  getPreferredTerminalFontSize,
+  getTerminalDimensions,
+  type TerminalDimensions,
+} from "../../terminal/size.js";
 
 export interface UseTerminalOptions {
+  fontFamily: string;
+  fontMode: TerminalFontMode;
   onInput(data: string): void;
   onTerminalSizeChange?(dimensions: TerminalDimensions): void;
   onReady?(): void | Promise<void>;
@@ -29,7 +36,7 @@ export interface UseTerminalResult {
 }
 
 export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
-  const { onInput, onReady, onTerminalSizeChange } = options;
+  const { fontFamily, fontMode, onInput, onReady, onTerminalSizeChange } = options;
 
   const mountRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -51,7 +58,9 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
     };
 
     void (async () => {
-      const fontReadyPromise = ensureBundledTerminalFontReady();
+      const fontReadyPromise = terminalFontModeNeedsBundledAsset(fontMode)
+        ? ensureBundledTerminalFontReady()
+        : Promise.resolve();
       await Promise.race([fontReadyPromise, waitForStartupFontBudget()]);
       if (cancelled) {
         return;
@@ -62,7 +71,7 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
         return;
       }
 
-      const { terminal, fitAddon } = createTerminalRuntime(mount);
+      const { terminal, fitAddon } = createTerminalRuntime(mount, { fontFamily });
       terminalRef.current = terminal;
       fitAddonRef.current = fitAddon;
       terminal.onData(onInput);
@@ -98,11 +107,41 @@ export function useTerminal(options: UseTerminalOptions): UseTerminalResult {
     };
   }, [onInput, onReady]);
 
+  useEffect(() => {
+    const mount = mountRef.current;
+    const terminal = terminalRef.current;
+    if (!mount || !terminal || terminal.options.fontFamily === fontFamily) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      if (terminalFontModeNeedsBundledAsset(fontMode)) {
+        await ensureBundledTerminalFontReady();
+      }
+      if (cancelled) {
+        return;
+      }
+
+      terminal.options.fontFamily = fontFamily;
+      syncTerminalFontSize(terminal, mount);
+      fitAddonRef.current?.fit();
+      lastResizeRef.current = null;
+      syncTerminalSize();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fontFamily, fontMode]);
+
   function getCurrentTerminalSize(): TerminalDimensions | null {
-    if (!terminalRef.current || !fitAddonRef.current) {
+    if (!terminalRef.current || !fitAddonRef.current || !mountRef.current) {
       return null;
     }
 
+    syncTerminalFontSize(terminalRef.current, mountRef.current);
     fitAddonRef.current.fit();
     return getTerminalDimensions(terminalRef.current);
   }
@@ -145,6 +184,19 @@ function waitForStartupFontBudget() {
   return new Promise<void>((resolve) => {
     window.setTimeout(resolve, 250);
   });
+}
+
+function syncTerminalFontSize(terminal: Terminal, mount: HTMLDivElement) {
+  const nextFontSize = getPreferredTerminalFontSize({
+    mountWidth: mount.clientWidth,
+    viewportWidth: window.innerWidth,
+  });
+
+  if (terminal.options.fontSize === nextFontSize) {
+    return;
+  }
+
+  terminal.options.fontSize = nextFontSize;
 }
 
 function installTerminalViewportAssist(mount: HTMLDivElement): () => void {

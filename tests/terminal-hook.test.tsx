@@ -33,10 +33,24 @@ class ResizeObserverStub {
   disconnect() {}
 }
 
-function TerminalHarness() {
+const onInputSpy = vi.fn();
+const onReadySpy = vi.fn();
+
+interface TerminalHarnessProps {
+  fontFamily?: string;
+  fontMode?: "bundled" | "installed-nerd" | "system";
+}
+
+function TerminalHarness(props: TerminalHarnessProps = {}) {
+  const {
+    fontFamily = '"Tmuxhop Terminal Nerd Font", monospace',
+    fontMode = "bundled",
+  } = props;
   const terminal = useTerminal({
-    onInput: vi.fn(),
-    onReady: vi.fn(),
+    fontFamily,
+    fontMode,
+    onInput: onInputSpy,
+    onReady: onReadySpy,
   });
 
   return <div ref={terminal.mountRef}></div>;
@@ -63,6 +77,7 @@ describe("useTerminal", () => {
       terminal: {
         dispose: vi.fn(),
         onData: vi.fn(),
+        options: { fontSize: 14 },
         open: vi.fn(),
         reset: vi.fn(),
         resize: vi.fn(),
@@ -106,6 +121,7 @@ describe("useTerminal", () => {
         rows: 30,
         dispose: vi.fn(),
         onData: vi.fn(),
+        options: { fontSize: 14 },
         open: vi.fn(),
         reset: vi.fn(),
         resize,
@@ -179,6 +195,7 @@ describe("useTerminal", () => {
         rows: 30,
         dispose: vi.fn(),
         onData: vi.fn(),
+        options: { fontSize: 14 },
         open: vi.fn(),
         reset: vi.fn(),
         resize: vi.fn(),
@@ -278,6 +295,7 @@ describe("useTerminal", () => {
         rows: 30,
         dispose: vi.fn(),
         onData: vi.fn(),
+        options: { fontSize: 14 },
         open: vi.fn(),
         reset: vi.fn(),
         resize: vi.fn(),
@@ -297,6 +315,113 @@ describe("useTerminal", () => {
 
     expect(scrollToSpy).not.toHaveBeenCalled();
     scrollToSpy.mockRestore();
+  });
+
+  it("switches to a denser terminal font on narrow mobile mounts", async () => {
+    vi.useFakeTimers();
+    fontDiagnosticsMock.ensureBundledTerminalFontReady.mockResolvedValueOnce(undefined);
+
+    Object.defineProperty(window, "ResizeObserver", {
+      configurable: true,
+      value: ResizeObserverStub,
+    });
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 390,
+    });
+
+    const fit = vi.fn();
+    const resize = vi.fn();
+    const terminal = {
+      cols: 90,
+      rows: 30,
+      dispose: vi.fn(),
+      onData: vi.fn(),
+      options: { fontSize: 14 },
+      open: vi.fn(),
+      reset: vi.fn(),
+      resize,
+      write: vi.fn(),
+    };
+
+    runtimeMock.createTerminalRuntime.mockReturnValue({
+      fitAddon: { fit },
+      terminal,
+    });
+
+    const { container } = render(<TerminalHarness />);
+    const mount = container.firstElementChild as HTMLDivElement;
+    Object.defineProperty(mount, "clientWidth", {
+      configurable: true,
+      value: 390,
+    });
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(terminal.options.fontSize).toBe(8);
+    expect(fit).toHaveBeenCalled();
+    expect(resize).toHaveBeenCalledWith(90, 30);
+  });
+
+  it("waits for bundled font loading before refitting when switching from system mode", async () => {
+    vi.useFakeTimers();
+    let resolveBundledReady: (() => void) | null = null;
+    fontDiagnosticsMock.ensureBundledTerminalFontReady.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveBundledReady = resolve;
+        }),
+    );
+
+    Object.defineProperty(window, "ResizeObserver", {
+      configurable: true,
+      value: ResizeObserverStub,
+    });
+
+    const fit = vi.fn();
+    const resize = vi.fn();
+    const terminal = {
+      cols: 90,
+      rows: 30,
+      dispose: vi.fn(),
+      onData: vi.fn(),
+      options: { fontFamily: "system-ui, monospace", fontSize: 14 },
+      open: vi.fn(),
+      reset: vi.fn(),
+      resize,
+      write: vi.fn(),
+    };
+
+    runtimeMock.createTerminalRuntime.mockReturnValue({
+      fitAddon: { fit },
+      terminal,
+    });
+
+    const { rerender } = render(
+      <TerminalHarness fontFamily="system-ui, monospace" fontMode="system" />,
+    );
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+
+    fit.mockClear();
+    resize.mockClear();
+
+    rerender(<TerminalHarness fontFamily='"Tmuxhop Terminal Nerd Font", monospace' fontMode="bundled" />);
+    await Promise.resolve();
+
+    expect(terminal.options.fontFamily).toBe("system-ui, monospace");
+    expect(fit).not.toHaveBeenCalled();
+    expect(resize).not.toHaveBeenCalled();
+
+    resolveBundledReady?.();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(terminal.options.fontFamily).toBe('"Tmuxhop Terminal Nerd Font", monospace');
+    expect(fit).toHaveBeenCalled();
+    expect(resize).toHaveBeenCalledWith(90, 30);
   });
 
 });

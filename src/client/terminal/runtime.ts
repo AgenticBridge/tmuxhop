@@ -11,7 +11,7 @@ import "@xterm/xterm/css/xterm.css";
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 
-import { TERMINAL_FONT_STACK } from "./font-diagnostics.js";
+import { getPreferredTerminalFontSize } from "./size.js";
 
 const terminalTheme = {
   background: "#111111",
@@ -24,12 +24,22 @@ export interface LoadedTerminalRuntime {
   terminal: Terminal;
 }
 
-export function createTerminalRuntime(mount: HTMLElement): LoadedTerminalRuntime {
+export interface CreateTerminalRuntimeOptions {
+  fontFamily: string;
+}
+
+export function createTerminalRuntime(
+  mount: HTMLElement,
+  options: CreateTerminalRuntimeOptions,
+): LoadedTerminalRuntime {
   const terminal = new Terminal({
     cursorBlink: true,
     convertEol: true,
-    fontFamily: TERMINAL_FONT_STACK,
-    fontSize: 14,
+    fontFamily: options.fontFamily,
+    fontSize: getPreferredTerminalFontSize({
+      mountWidth: mount.clientWidth,
+      viewportWidth: window.innerWidth,
+    }),
     scrollback: 5000,
     theme: terminalTheme,
   });

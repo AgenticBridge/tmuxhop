@@ -8,7 +8,28 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-import { getTerminalDimensions } from "../src/client/terminal/size.js";
+import {
+  getPreferredTerminalFontSize,
+  getTerminalDimensions,
+} from "../src/client/terminal/size.js";
+
+describe("getPreferredTerminalFontSize", () => {
+  it("keeps the desktop font size on wide layouts", () => {
+    expect(getPreferredTerminalFontSize({ mountWidth: 960, viewportWidth: 1280 })).toBe(14);
+  });
+
+  it("uses a slightly denser size on tablet widths", () => {
+    expect(getPreferredTerminalFontSize({ mountWidth: 720, viewportWidth: 768 })).toBe(11);
+  });
+
+  it("uses a denser size on phone widths", () => {
+    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(8);
+  });
+
+  it("uses the densest size on very narrow phones", () => {
+    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(7);
+  });
+});
 
 describe("getTerminalDimensions", () => {
   it("reads the fitted terminal size", () => {

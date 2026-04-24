@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { PathLevel, SessionSummary, WindowInfo } from "../../../server/protocol.js";
 import type { FontCompatibilityReport } from "../../terminal/font-diagnostics.js";
+import type { TerminalFontMode } from "../../terminal/settings.js";
 import type { NavScope, StatusState } from "../ui.js";
 import { ControlSheet } from "./ControlSheet.js";
 import { WarningSheet } from "./WarningSheet.js";
@@ -18,9 +19,11 @@ import { WarningSheet } from "./WarningSheet.js";
 type PickerScope = "sessions" | "windows" | "panes";
 
 export interface UtilityBarProps {
+  fontMode?: TerminalFontMode;
   fontReport: FontCompatibilityReport;
   onCreatePath(level: PathLevel, name: string): Promise<void>;
   onDeletePath(level: PathLevel): Promise<void>;
+  onFontModeChange?(mode: TerminalFontMode): void;
   onReconnect(): void;
   onRefreshFontReport(): void;
   onRenamePath(level: PathLevel, name: string): Promise<void>;
@@ -38,9 +41,11 @@ export interface UtilityBarProps {
 
 export function UtilityBar(props: UtilityBarProps) {
   const {
+    fontMode = "bundled",
     fontReport,
     onCreatePath,
     onDeletePath,
+    onFontModeChange = () => {},
     onReconnect,
     onRefreshFontReport,
     onRenamePath,
@@ -282,10 +287,12 @@ export function UtilityBar(props: UtilityBarProps) {
           windows: selectedWindow?.name ?? null,
           panes: selectedPane?.title ?? null,
         }}
+        fontMode={fontMode}
         level={controlLevel}
         onCreate={onCreatePath}
         onClose={() => setControlOpen(false)}
         onDelete={onDeletePath}
+        onFontModeChange={onFontModeChange}
         onLevelChange={setControlLevel}
         onRename={onRenamePath}
         open={controlOpen}

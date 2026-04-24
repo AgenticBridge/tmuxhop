@@ -10,23 +10,41 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { PathLevel } from "../../../server/protocol.js";
+import {
+  TERMINAL_FONT_MODE_OPTIONS,
+  type TerminalFontMode,
+} from "../../terminal/settings.js";
 import type { NavScope } from "../ui.js";
 import { formatScopeLabel, NAV_SCOPES } from "../ui.js";
 
 export interface ControlSheetProps {
   availability: Record<PathLevel, boolean>;
   currentLabels: Record<PathLevel, string | null>;
+  fontMode: TerminalFontMode;
   level: NavScope;
   onCreate(level: PathLevel, name: string): Promise<void>;
   onClose(): void;
   onDelete(level: PathLevel): Promise<void>;
+  onFontModeChange(mode: TerminalFontMode): void;
   onLevelChange(level: NavScope): void;
   onRename(level: PathLevel, name: string): Promise<void>;
   open: boolean;
 }
 
 export function ControlSheet(props: ControlSheetProps) {
-  const { availability, currentLabels, level, onClose, onCreate, onDelete, onLevelChange, onRename, open } = props;
+  const {
+    availability,
+    currentLabels,
+    fontMode,
+    level,
+    onClose,
+    onCreate,
+    onDelete,
+    onFontModeChange,
+    onLevelChange,
+    onRename,
+    open,
+  } = props;
   const [draftName, setDraftName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"create" | "rename" | "delete" | null>(null);
@@ -109,53 +127,58 @@ export function ControlSheet(props: ControlSheetProps) {
         </div>
         <div className="control-sheet__content">
           <div className="control-sheet__field">
-            <span className="control-sheet__label">{`Level: ${formatLevelLabel(level)}`}</span>
-            <div className="control-sheet__levels" role="group" aria-label="Path levels">
-              {NAV_SCOPES.map((scope) => (
+            <span className="control-sheet__label">View control</span>
+            <div className="control-sheet__field">
+              <span className="control-sheet__label">{`Level: ${formatLevelLabel(level)}`}</span>
+              <div className="control-sheet__levels" role="group" aria-label="Path levels">
+                {NAV_SCOPES.map((scope) => (
+                  <button
+                    key={scope}
+                    className="tab-button control-sheet__level"
+                    data-active={level === scope ? "true" : undefined}
+                    type="button"
+                    onClick={() => onLevelChange(scope as NavScope)}
+                  >
+                    {currentLabels[scope] ?? formatScopeLabel(scope)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="control-sheet__field">
+              <span className="control-sheet__label">Action</span>
+              <div className="control-sheet__actions" role="group" aria-label="Path actions">
                 <button
-                  key={scope}
-                  className="tab-button control-sheet__level"
-                  data-active={level === scope ? "true" : undefined}
+                  className="tab-button"
                   type="button"
-                  onClick={() => onLevelChange(scope as NavScope)}
+                  disabled={!canCreate || pending}
+                  title="Add"
+                  onClick={() => setMode("create")}
                 >
-                  {currentLabels[scope] ?? formatScopeLabel(scope)}
+                  +
                 </button>
-              ))}
+                <button
+                  className="tab-button"
+                  type="button"
+                  disabled={!canRename || pending}
+                  title="Rename"
+                  onClick={() => setMode("rename")}
+                >
+                  ✎
+                </button>
+                <button
+                  className="tab-button"
+                  type="button"
+                  disabled={!canDelete || pending}
+                  title="Delete"
+                  onClick={() => setMode("delete")}
+                >
+                  −
+                </button>
+              </div>
             </div>
           </div>
-          <p className="control-sheet__label">Action</p>
-          <div className="control-sheet__actions" role="group" aria-label="Path actions">
-            <button
-              className="tab-button"
-              type="button"
-              disabled={!canCreate || pending}
-              title="Add"
-              onClick={() => setMode("create")}
-            >
-              +
-            </button>
-            <button
-              className="tab-button"
-              type="button"
-              disabled={!canRename || pending}
-              title="Rename"
-              onClick={() => setMode("rename")}
-            >
-              ✎
-            </button>
-            <button
-              className="tab-button"
-              type="button"
-              disabled={!canDelete || pending}
-              title="Delete"
-              onClick={() => setMode("delete")}
-            >
-              −
-            </button>
-          </div>
           {mode ? (
-            <div className="control-sheet__editor">
+            <div className="control-sheet__editor control-sheet__section">
               <p className="control-sheet__label">{actionLabel}</p>
               {mode === "delete" ? (
                 <p className="control-sheet__hint">
@@ -200,6 +223,27 @@ export function ControlSheet(props: ControlSheetProps) {
               </div>
             </div>
           ) : null}
+          <div className="control-sheet__field control-sheet__section">
+            <span className="control-sheet__label">Terminal font</span>
+            <div
+              className="control-sheet__levels control-sheet__levels--auto"
+              role="group"
+              aria-label="Terminal font"
+            >
+              {TERMINAL_FONT_MODE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  className="tab-button control-sheet__level"
+                  data-active={fontMode === option.value ? "true" : undefined}
+                  type="button"
+                  title={option.description}
+                  onClick={() => onFontModeChange(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>

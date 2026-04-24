@@ -8,10 +8,12 @@
  */
 import type { PathLevel, SessionSummary, WindowInfo } from "../../../server/protocol.js";
 import type { FontCompatibilityReport } from "../../terminal/font-diagnostics.js";
+import type { TerminalFontMode } from "../../terminal/settings.js";
 import type { NavScope, StatusState } from "../ui.js";
 
 export interface AppController {
   fontModalOpen: boolean;
+  fontMode: TerminalFontMode;
   fontReport: FontCompatibilityReport;
   navScope: NavScope;
   selectedPaneId: string | null;
@@ -30,12 +32,14 @@ export interface AppController {
   onReconnect(): void;
   onCreatePath(level: PathLevel, name: string): Promise<void>;
   onDeletePath(level: PathLevel): Promise<void>;
+  onFontModeChange(mode: TerminalFontMode): void;
   onRenamePath(level: PathLevel, name: string): Promise<void>;
   onSelectNavScope(scope: NavScope): void;
   onSelectPane(paneId: string): void;
   onSelectSession(sessionName: string): void;
   onSelectWindow(windowId: string): void;
   onShortcut(input: string): void;
+  onTextInput(data: string): void;
   refreshFontReport(): void;
   toggleFontModal(): void;
 }

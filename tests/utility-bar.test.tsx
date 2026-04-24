@@ -157,7 +157,7 @@ describe("UtilityBar", () => {
           status: "warn",
           headline: "Font needs help",
           details: "Prompt icons are missing.",
-          recommendedFonts: ["JetBrainsMono Nerd Font"],
+          recommendedFonts: ["IosevkaTerm Nerd Font"],
         }}
         onCreatePath={vi.fn(async () => undefined)}
         onDeletePath={vi.fn(async () => undefined)}
@@ -203,6 +203,7 @@ describe("UtilityBar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Controls" }));
     expect(screen.getByLabelText("Path actions")).not.toBeNull();
     expect(screen.getByRole("group", { name: "Path levels" })).not.toBeNull();
+    expect(screen.getByText("View control")).not.toBeNull();
     expect(screen.getByText("Level: Session")).not.toBeNull();
     expect(screen.getByText("Action")).not.toBeNull();
     expect(screen.getByRole("button", { name: "main" })).not.toBeNull();
@@ -277,6 +278,7 @@ describe("UtilityBar", () => {
     fireEvent.click(paneLevelButton);
     fireEvent.click(screen.getByTitle("Add"));
 
+    expect(screen.getByText("View control")).not.toBeNull();
     expect(screen.getByText("Level: Pane")).not.toBeNull();
     expect(screen.getByText("Action")).not.toBeNull();
     expect(paneLevelButton.getAttribute("data-active")).toBe("true");
@@ -415,5 +417,49 @@ describe("UtilityBar", () => {
     );
 
     expect(screen.getByRole("button", { name: "mai…" })).not.toBeNull();
+  });
+
+  it("changes terminal font mode from the control sheet", () => {
+    const onFontModeChange = vi.fn();
+
+    Object.defineProperty(window, "ResizeObserver", {
+      configurable: true,
+      value: ResizeObserverStub,
+    });
+
+    render(
+      <UtilityBar
+        fontMode="bundled"
+        fontReport={{
+          boxDrawing: true,
+          powerline: true,
+          nerdFont: true,
+          status: "ok",
+          headline: "ok",
+          details: "ok",
+          recommendedFonts: [],
+        }}
+        onCreatePath={vi.fn(async () => undefined)}
+        onDeletePath={vi.fn(async () => undefined)}
+        onFontModeChange={onFontModeChange}
+        onReconnect={vi.fn()}
+        onRefreshFontReport={vi.fn()}
+        onRenamePath={vi.fn(async () => undefined)}
+        onSelectPane={vi.fn()}
+        onSelectSession={vi.fn()}
+        onSelectWindow={vi.fn()}
+        selectedPaneId="%1"
+        selectedSessionName="main"
+        selectedWindowId="@1"
+        selectedWindowPanes={[]}
+        sessions={[{ name: "main", attached: true, windows: 1 }]}
+        status={{ label: "Live", tone: "ok" }}
+        windows={[]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Controls" }));
+    fireEvent.click(screen.getByRole("button", { name: "System Mono" }));
+    expect(onFontModeChange).toHaveBeenCalledWith("system");
   });
 });
