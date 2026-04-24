@@ -8,8 +8,6 @@
  * delegate orchestration to the app controller hook.
  */
 import { ControlBar } from "./components/ControlBar.js";
-import { FontStatusModal } from "./components/FontStatusModal.js";
-import { ScopeNav } from "./components/ScopeNav.js";
 import { TerminalPanel } from "./components/TerminalPanel.js";
 import { UtilityBar } from "./components/UtilityBar.js";
 import { useAppController } from "./controller/useAppController.js";
@@ -21,12 +19,22 @@ export function App() {
   return (
     <>
       <UtilityBar
-        fontModalOpen={controller.fontModalOpen}
         fontReport={controller.fontReport}
+        onCreatePath={controller.onCreatePath}
+        onDeletePath={controller.onDeletePath}
         onReconnect={controller.onReconnect}
-        onToggleFontModal={controller.toggleFontModal}
-        sessionTitle={controller.sessionTitle}
+        onRefreshFontReport={controller.refreshFontReport}
+        onRenamePath={controller.onRenamePath}
+        onSelectPane={controller.onSelectPane}
+        onSelectSession={controller.onSelectSession}
+        onSelectWindow={controller.onSelectWindow}
+        selectedPaneId={controller.selectedPaneId}
+        selectedSessionName={controller.selectedSessionName}
+        selectedWindowId={controller.selectedWindowId}
+        selectedWindowPanes={controller.selectedWindowPanes}
+        sessions={controller.sessions}
         status={controller.status}
+        windows={controller.windows}
       />
 
       <section className={`empty-state${controller.showEmptyState ? "" : " hidden"}`}>
@@ -37,28 +45,7 @@ export function App() {
         </p>
       </section>
 
-      <FontStatusModal
-        fontModalOpen={controller.fontModalOpen}
-        fontReport={controller.fontReport}
-        onClose={controller.closeFontModal}
-        onRefresh={controller.refreshFontReport}
-      />
-
       <main id="app-content" className={`app-content${controller.showApp ? "" : " hidden"}`}>
-        <ScopeNav
-          navScope={controller.navScope}
-          onSelectNavScope={controller.onSelectNavScope}
-          onSelectPane={controller.onSelectPane}
-          onSelectSession={controller.onSelectSession}
-          onSelectWindow={controller.onSelectWindow}
-          selectedPaneId={controller.selectedPaneId}
-          selectedSessionName={controller.selectedSessionName}
-          selectedWindowId={controller.selectedWindowId}
-          selectedWindowPanes={controller.selectedWindowPanes}
-          sessions={controller.sessions}
-          windows={controller.windows}
-        />
-
         <TerminalPanel mountRef={controller.terminalMountRef} />
       </main>
 

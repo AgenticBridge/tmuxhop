@@ -37,6 +37,7 @@ const fontDiagnosticsMock = vi.hoisted(() => ({
 
 const sessionsMock = vi.hoisted(() => ({
   loadState: vi.fn(),
+  refreshSessions: vi.fn(),
   loadWindowsForSelectedSession: vi.fn(),
   selectPane: vi.fn(),
   selectSession: vi.fn(),
@@ -97,6 +98,7 @@ describe("useAppController", () => {
   afterEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
+    sessionsMock.refreshSessions.mockResolvedValue("notes");
   });
 
   it("keeps font status in checking state until the bundled font preload completes", async () => {
@@ -200,5 +202,103 @@ describe("useAppController", () => {
       paneId: "%5",
       preserveTerminal: true,
     });
+  });
+
+  it("creates a path target and reloads using the returned selection", async () => {
+    sessionsMock.refreshSessions.mockResolvedValue("notes");
+    sessionsMock.loadWindowsForSelectedSession.mockResolvedValue({ selectedPaneId: "%7" });
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        sessionName: "notes",
+        windowId: "@9",
+        paneId: "%9",
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { result } = renderHook(() => useAppController());
+
+    await act(async () => {
+      await result.current.onCreatePath("sessions", "notes");
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/path-control", expect.objectContaining({
+      method: "POST",
+    }));
+    expect(sessionsMock.selectSession).toHaveBeenCalledWith("notes");
+    expect(sessionsMock.refreshSessions).toHaveBeenCalledWith({
+      preferredSessionName: "notes",
+    });
+    expect(sessionsMock.loadWindowsForSelectedSession).toHaveBeenCalledWith({
+      sessionName: "notes",
+      preserveSelection: undefined,
+      preferredSelection: {
+        selectedWindowId: "@9",
+        selectedPaneId: "%9",
+      },
+    });
+    expect(paneConnectionMock.attachSelectedPane).toHaveBeenCalledWith({ paneId: "%9" });
+  });
+
+  it("deletes a path target and reloads with preserved selection", async () => {
+    sessionsMock.loadWindowsForSelectedSession.mockResolvedValue({ selectedPaneId: "%3" });
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        sessionName: "tmuxhop",
+        windowId: null,
+        paneId: null,
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { result } = renderHook(() => useAppController());
+
+    await act(async () => {
+      await result.current.onDeletePath("panes");
+    });
+
+    expect(sessionsMock.loadWindowsForSelectedSession).toHaveBeenCalledWith({
+      sessionName: "tmuxhop",
+      preserveSelection: true,
+      preferredSelection: undefined,
+    });
+    expect(sessionsMock.refreshSessions).not.toHaveBeenCalled();
+    expect(paneConnectionMock.attachSelectedPane).toHaveBeenCalledWith({ paneId: "%3" });
+  });
+
+  it("refreshes the session list after a session rename before reloading windows", async () => {
+    sessionsMock.refreshSessions.mockResolvedValue("renamed");
+    sessionsMock.loadWindowsForSelectedSession.mockResolvedValue({ selectedPaneId: "%4" });
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        sessionName: "renamed",
+        windowId: "@1",
+        paneId: "%4",
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { result } = renderHook(() => useAppController());
+
+    await act(async () => {
+      await result.current.onRenamePath("sessions", "renamed");
+    });
+
+    expect(sessionsMock.selectSession).toHaveBeenCalledWith("renamed");
+    expect(sessionsMock.refreshSessions).toHaveBeenCalledWith({
+      preferredSessionName: "renamed",
+    });
+    expect(sessionsMock.loadWindowsForSelectedSession).toHaveBeenCalledWith({
+      sessionName: "renamed",
+      preserveSelection: true,
+      preferredSelection: {
+        selectedWindowId: "@1",
+        selectedPaneId: "%4",
+      },
+    });
+    expect(paneConnectionMock.attachSelectedPane).toHaveBeenCalledWith({ paneId: "%4" });
   });
 });

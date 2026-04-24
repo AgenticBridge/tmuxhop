@@ -6,7 +6,7 @@
  *
  * Boundary: client-only type definitions for the app orchestration layer.
  */
-import type { SessionSummary, WindowInfo } from "../../../server/protocol.js";
+import type { PathLevel, SessionSummary, WindowInfo } from "../../../server/protocol.js";
 import type { FontCompatibilityReport } from "../../terminal/font-diagnostics.js";
 import type { NavScope, StatusState } from "../ui.js";
 
@@ -28,6 +28,9 @@ export interface AppController {
   windows: WindowInfo[];
   closeFontModal(): void;
   onReconnect(): void;
+  onCreatePath(level: PathLevel, name: string): Promise<void>;
+  onDeletePath(level: PathLevel): Promise<void>;
+  onRenamePath(level: PathLevel, name: string): Promise<void>;
   onSelectNavScope(scope: NavScope): void;
   onSelectPane(paneId: string): void;
   onSelectSession(sessionName: string): void;

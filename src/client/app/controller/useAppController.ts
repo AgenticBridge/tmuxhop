@@ -11,7 +11,12 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { ClientSocketMessage } from "../../../server/protocol.js";
+import type {
+  ClientSocketMessage,
+  PathLevel,
+  PathMutationRequest,
+  PathMutationResponse,
+} from "../../../server/protocol.js";
 import {
   createPendingFontCompatibilityReport,
   detectFontCompatibility,
@@ -94,6 +99,54 @@ export function useAppController(): AppController {
     await paneConnection.attachSelectedPane({ paneId: selectedPaneId });
   }
 
+  async function mutatePath(request: PathMutationRequest): Promise<PathMutationResponse> {
+    const response = await fetch("/api/path-control", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(payload?.error || `Path action failed: ${response.status}`);
+    }
+
+    return (await response.json()) as PathMutationResponse;
+  }
+
+  async function reloadAfterMutation(
+    response: PathMutationResponse,
+    options: {
+      refreshSessions?: boolean;
+      preserveSelection?: boolean;
+    } = {},
+  ) {
+    const nextSessionName = options.refreshSessions
+      ? await sessions.refreshSessions({
+          preferredSessionName:
+            response.sessionName ?? sessions.latestStateRef.current.selectedSessionName,
+        })
+      : response.sessionName ?? sessions.latestStateRef.current.selectedSessionName;
+
+    const { selectedPaneId } = await sessions.loadWindowsForSelectedSession({
+      sessionName: nextSessionName,
+      preserveSelection: options.preserveSelection,
+      preferredSelection:
+        response.windowId || response.paneId
+          ? {
+              selectedWindowId: response.windowId,
+              selectedPaneId: response.paneId,
+            }
+          : undefined,
+    });
+
+    await paneConnection.attachSelectedPane({
+      paneId: response.paneId ?? selectedPaneId,
+    });
+  }
+
   const terminal = useTerminal({
     onInput: useCallback((data: string) => {
       sendSocketMessageRef.current({ type: "input", data });
@@ -127,8 +180,55 @@ export function useAppController(): AppController {
     fontModalOpen,
     fontReport,
     navScope,
+    onCreatePath: async (level: PathLevel, name: string) => {
+      const response = await mutatePath({
+        action: "create",
+        level,
+        name,
+        sessionName: sessions.latestStateRef.current.selectedSessionName,
+        windowId: sessions.latestStateRef.current.selectedWindowId,
+        paneId: sessions.latestStateRef.current.selectedPaneId,
+      });
+
+      if (response.sessionName) {
+        sessions.selectSession(response.sessionName);
+      }
+      await reloadAfterMutation(response, { refreshSessions: level === "sessions" });
+    },
+    onDeletePath: async (level: PathLevel) => {
+      const response = await mutatePath({
+        action: "delete",
+        level,
+        sessionName: sessions.latestStateRef.current.selectedSessionName,
+        windowId: sessions.latestStateRef.current.selectedWindowId,
+        paneId: sessions.latestStateRef.current.selectedPaneId,
+      });
+
+      await reloadAfterMutation(response, {
+        preserveSelection: true,
+        refreshSessions: level === "sessions",
+      });
+    },
     onReconnect: () => {
       void reconnectSelectedPane();
+    },
+    onRenamePath: async (level: PathLevel, name: string) => {
+      const response = await mutatePath({
+        action: "rename",
+        level,
+        name,
+        sessionName: sessions.latestStateRef.current.selectedSessionName,
+        windowId: sessions.latestStateRef.current.selectedWindowId,
+        paneId: sessions.latestStateRef.current.selectedPaneId,
+      });
+
+      if (response.sessionName) {
+        sessions.selectSession(response.sessionName);
+      }
+      await reloadAfterMutation(response, {
+        preserveSelection: true,
+        refreshSessions: level === "sessions",
+      });
     },
     onSelectNavScope: setNavScope,
     onSelectPane: (paneId: string) => {

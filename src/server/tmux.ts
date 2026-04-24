@@ -12,6 +12,7 @@ import { promisify } from "node:util";
 
 import type {
   PaneInfo,
+  PathMutationResponse,
   SessionState,
   SessionSummary,
   WindowInfo,
@@ -299,6 +300,126 @@ export async function enablePanePipe(paneId: string, outputPath: string): Promis
 
 export async function disablePanePipe(paneId: string): Promise<void> {
   await runTmux(["pipe-pane", "-t", paneId]);
+}
+
+export async function createSession(sessionName: string): Promise<PathMutationResponse> {
+  const raw = await runTmux([
+    "new-session",
+    "-d",
+    "-P",
+    "-F",
+    "#{session_name}\t#{window_id}\t#{pane_id}",
+    "-s",
+    sessionName,
+  ]);
+  const [createdSessionName = sessionName, windowId = null, paneId = null] = raw.split(FIELD_SEPARATOR);
+  return {
+    sessionName: createdSessionName,
+    windowId,
+    paneId,
+  };
+}
+
+export async function createWindow(
+  sessionName: string,
+  name?: string,
+): Promise<PathMutationResponse> {
+  const args = ["new-window", "-d", "-P", "-F", "#{window_id}\t#{pane_id}", "-t", sessionName];
+  if (name?.trim()) {
+    args.push("-n", name.trim());
+  }
+
+  const raw = await runTmux(args);
+  const [windowId = null, paneId = null] = raw.split(FIELD_SEPARATOR);
+  return {
+    sessionName,
+    windowId,
+    paneId,
+  };
+}
+
+export async function createPane(
+  sessionName: string,
+  windowId: string,
+  name?: string,
+): Promise<PathMutationResponse> {
+  const paneId = await runTmux([
+    "split-window",
+    "-d",
+    "-P",
+    "-F",
+    "#{pane_id}",
+    "-t",
+    windowId,
+  ]);
+
+  if (name?.trim()) {
+    await renamePane(paneId, name);
+  }
+
+  return {
+    sessionName,
+    windowId,
+    paneId,
+  };
+}
+
+export async function renameSession(
+  sessionName: string,
+  name: string,
+): Promise<PathMutationResponse> {
+  await runTmux(["rename-session", "-t", sessionName, name]);
+  return {
+    sessionName: name,
+    windowId: null,
+    paneId: null,
+  };
+}
+
+export async function renameWindow(
+  sessionName: string,
+  windowId: string,
+  name: string,
+): Promise<PathMutationResponse> {
+  await runTmux(["rename-window", "-t", windowId, name]);
+  return {
+    sessionName,
+    windowId,
+    paneId: null,
+  };
+}
+
+export async function renamePane(
+  paneId: string,
+  name: string,
+): Promise<void> {
+  await runTmux(["select-pane", "-t", paneId, "-T", name]);
+}
+
+export async function renamePaneWithContext(
+  sessionName: string,
+  windowId: string,
+  paneId: string,
+  name: string,
+): Promise<PathMutationResponse> {
+  await renamePane(paneId, name);
+  return {
+    sessionName,
+    windowId,
+    paneId,
+  };
+}
+
+export async function deleteSession(sessionName: string): Promise<void> {
+  await runTmux(["kill-session", "-t", sessionName]);
+}
+
+export async function deleteWindow(windowId: string): Promise<void> {
+  await runTmux(["kill-window", "-t", windowId]);
+}
+
+export async function deletePane(paneId: string): Promise<void> {
+  await runTmux(["kill-pane", "-t", paneId]);
 }
 
 function getErrorMessage(error: unknown): string {

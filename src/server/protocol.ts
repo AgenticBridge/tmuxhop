@@ -52,6 +52,24 @@ export interface SessionsResponse {
   defaultSessionName: string | null;
 }
 
+export type PathLevel = "sessions" | "windows" | "panes";
+export type PathAction = "create" | "rename" | "delete";
+
+export interface PathMutationRequest {
+  action: PathAction;
+  level: PathLevel;
+  name?: string;
+  sessionName?: string | null;
+  windowId?: string | null;
+  paneId?: string | null;
+}
+
+export interface PathMutationResponse {
+  sessionName: string | null;
+  windowId: string | null;
+  paneId: string | null;
+}
+
 export type ClientSocketMessage =
   | { type: "input"; data: string }
   | { type: "shortcut"; data: string }

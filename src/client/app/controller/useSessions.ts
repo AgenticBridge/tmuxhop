@@ -28,6 +28,11 @@ export interface SessionLoadResult {
   selectedPaneId: string | null;
 }
 
+interface PreferredSelection {
+  selectedPaneId?: string | null;
+  selectedWindowId?: string | null;
+}
+
 export interface UseSessionsOptions {
   onStatusChange(label: string, tone?: "default" | "ok" | "warn" | "error"): void;
   requestGuards: UseRequestGuardsResult;
@@ -46,7 +51,11 @@ export interface UseSessionsResult {
   showEmptyState: boolean;
   windows: WindowInfo[];
   loadState(): Promise<SessionLoadResult>;
+  refreshSessions(options?: {
+    preferredSessionName?: string | null;
+  }): Promise<string | null>;
   loadWindowsForSelectedSession(options?: {
+    preferredSelection?: PreferredSelection;
     preserveSelection?: boolean;
     sessionName?: string | null;
   }): Promise<SessionLoadResult>;
@@ -95,10 +104,51 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     return (await response.json()) as T;
   }
 
+  async function fetchSessionsPayload(): Promise<SessionsResponse> {
+    return fetchJson<SessionsResponse>("/api/sessions");
+  }
+
+  function applyMissingState() {
+    setSessions([]);
+    setWindows([]);
+    setSelectedSessionName(null);
+    setSelectedWindowId(null);
+    setSelectedPaneId(null);
+    setSessionTitle("No Sessions");
+    setShowEmptyState(true);
+    setShowApp(false);
+    setShowControls(false);
+    latestStateRef.current = {
+      selectedSessionName: null,
+      selectedWindowId: null,
+      selectedPaneId: null,
+      windows: [],
+    };
+    onStatusChange("Missing", "warn");
+  }
+
+  function applySessionsPayload(sessionsPayload: SessionsResponse): string | null {
+    const nextSessionName = getInitialSessionName(
+      sessionsPayload.sessions,
+      sessionsPayload.defaultSessionName,
+    );
+
+    setSessions(sessionsPayload.sessions);
+    setSelectedSessionName(nextSessionName);
+    latestStateRef.current = {
+      ...latestStateRef.current,
+      selectedSessionName: nextSessionName,
+    };
+
+    return nextSessionName;
+  }
+
   async function loadWindowsForSelectedSession({
+    preferredSelection,
     sessionName,
     preserveSelection = false,
   }: {
+    preferredSelection?: PreferredSelection;
     sessionName?: string | null;
     preserveSelection?: boolean;
   } = {}): Promise<SessionLoadResult> {
@@ -114,6 +164,7 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
         return { selectedPaneId: null };
       }
       setWindows([]);
+      setSelectedSessionName(null);
       setSelectedWindowId(null);
       setSelectedPaneId(null);
       setShowEmptyState(true);
@@ -135,14 +186,35 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     setSessionTitle(windowsPayload.sessionName || "Shared Session");
 
     if (!windowsPayload.exists) {
-      setWindows([]);
-      setSelectedWindowId(null);
-      setSelectedPaneId(null);
-      setShowEmptyState(true);
-      setShowApp(false);
-      setShowControls(false);
-      onStatusChange("Missing", "warn");
-      return { selectedPaneId: null };
+      const sessionsPayload = await fetchSessionsPayload();
+      if (!requestGuards.isCurrentRequestRevision(requestRevision)) {
+        return { selectedPaneId: null };
+      }
+
+      const fallbackSessionName = getInitialSessionName(
+        sessionsPayload.sessions.filter((session) => session.name !== targetSessionName),
+        sessionsPayload.defaultSessionName === targetSessionName
+          ? null
+          : sessionsPayload.defaultSessionName,
+      );
+
+      if (!fallbackSessionName) {
+        applyMissingState();
+        return { selectedPaneId: null };
+      }
+
+      setSessions(sessionsPayload.sessions);
+      setSelectedSessionName(fallbackSessionName);
+      latestStateRef.current = {
+        ...latestStateRef.current,
+        selectedSessionName: fallbackSessionName,
+      };
+
+      return loadWindowsForSelectedSession({
+        preferredSelection,
+        sessionName: fallbackSessionName,
+        preserveSelection,
+      });
     }
 
     setShowEmptyState(false);
@@ -150,9 +222,18 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     setShowControls(true);
     setWindows(windowsPayload.windows);
 
-    const selection = preserveSelection
-      ? getRecoveredSelection(windowsPayload.windows, previousSelection, windowsPayload.activePaneId)
-      : getInitialSelection(windowsPayload.windows, windowsPayload.activePaneId);
+    const selection = preferredSelection
+      ? getRecoveredSelection(
+          windowsPayload.windows,
+          {
+            selectedWindowId: preferredSelection.selectedWindowId ?? null,
+            selectedPaneId: preferredSelection.selectedPaneId ?? null,
+          },
+          windowsPayload.activePaneId,
+        )
+      : preserveSelection
+        ? getRecoveredSelection(windowsPayload.windows, previousSelection, windowsPayload.activePaneId)
+        : getInitialSelection(windowsPayload.windows, windowsPayload.activePaneId);
 
     setSelectedWindowId(selection.selectedWindowId);
     setSelectedPaneId(selection.selectedPaneId);
@@ -170,14 +251,35 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
 
   async function loadState(): Promise<SessionLoadResult> {
     const requestRevision = requestGuards.beginRequestRevision();
-    const sessionsPayload = await fetchJson<SessionsResponse>("/api/sessions");
+    const sessionsPayload = await fetchSessionsPayload();
     if (!requestGuards.isCurrentRequestRevision(requestRevision)) {
       return { selectedPaneId: null };
     }
 
+    const nextSessionName = applySessionsPayload(sessionsPayload);
+
+    if (sessionsPayload.sessions.length === 0) {
+      applyMissingState();
+      return { selectedPaneId: null };
+    }
+
+    return loadWindowsForSelectedSession({ sessionName: nextSessionName });
+  }
+
+  async function refreshSessions({
+    preferredSessionName,
+  }: {
+    preferredSessionName?: string | null;
+  } = {}): Promise<string | null> {
+    const requestRevision = requestGuards.beginRequestRevision();
+    const sessionsPayload = await fetchSessionsPayload();
+    if (!requestGuards.isCurrentRequestRevision(requestRevision)) {
+      return null;
+    }
+
     const nextSessionName = getInitialSessionName(
       sessionsPayload.sessions,
-      sessionsPayload.defaultSessionName,
+      preferredSessionName ?? sessionsPayload.defaultSessionName,
     );
 
     setSessions(sessionsPayload.sessions);
@@ -187,16 +289,7 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
       selectedSessionName: nextSessionName,
     };
 
-    if (sessionsPayload.sessions.length === 0) {
-      setSessionTitle("No Sessions");
-      setShowEmptyState(true);
-      setShowApp(false);
-      setShowControls(false);
-      onStatusChange("Missing", "warn");
-      return { selectedPaneId: null };
-    }
-
-    return loadWindowsForSelectedSession({ sessionName: nextSessionName });
+    return nextSessionName;
   }
 
   function selectSession(sessionName: string) {
@@ -242,6 +335,7 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     showEmptyState,
     windows,
     loadState,
+    refreshSessions,
     loadWindowsForSelectedSession,
     selectPane,
     selectSession,

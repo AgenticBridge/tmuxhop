@@ -7,7 +7,7 @@
  *
  * Boundary: client terminal lifecycle coverage only.
  */
-import { render, waitFor } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useTerminal } from "../src/client/app/hooks/useTerminal.js";
@@ -81,10 +81,8 @@ describe("useTerminal", () => {
     expect(runtimeMock.createTerminalRuntime).not.toHaveBeenCalled();
 
     await vi.advanceTimersByTimeAsync(250);
-
-    await waitFor(() => {
-      expect(runtimeMock.createTerminalRuntime).toHaveBeenCalledTimes(1);
-    });
+    await Promise.resolve();
+    expect(runtimeMock.createTerminalRuntime).toHaveBeenCalledTimes(1);
 
     resolveFontReady?.();
   });
@@ -122,10 +120,8 @@ describe("useTerminal", () => {
 
     render(<TerminalHarness />);
     await vi.advanceTimersByTimeAsync(250);
-
-    await waitFor(() => {
-      expect(runtimeMock.createTerminalRuntime).toHaveBeenCalledTimes(1);
-    });
+    await Promise.resolve();
+    expect(runtimeMock.createTerminalRuntime).toHaveBeenCalledTimes(1);
 
     resolveFontReady?.();
     await Promise.resolve();

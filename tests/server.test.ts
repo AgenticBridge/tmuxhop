@@ -104,6 +104,11 @@ describe("createServer", () => {
       paneExists: vi.fn(async () => true),
       createPaneStream: vi.fn(async () => stream),
       sendInput: vi.fn(async () => undefined),
+      mutatePath: vi.fn(async () => ({
+        sessionName: "tmuxhop",
+        windowId: "@1",
+        paneId: "%1",
+      })),
       ...overrides,
     };
 

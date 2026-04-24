@@ -59,17 +59,22 @@ describe("useSessions", () => {
 
   it("marks a selected session as missing when the tmux session does not exist", async () => {
     const onStatusChange = vi.fn();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () =>
+    vi.stubGlobal("fetch", vi
+      .fn()
+      .mockResolvedValueOnce(
         mockJsonResponse({
           exists: false,
           sessionName: "tmuxhop",
           windows: [],
           activePaneId: null,
         }),
-      ),
-    );
+      )
+      .mockResolvedValueOnce(
+        mockJsonResponse({
+          sessions: [],
+          defaultSessionName: null,
+        }),
+      ));
 
     const { result } = renderHook(() => {
       const guards = useRequestGuards({ onStatusChange });
