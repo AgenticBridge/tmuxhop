@@ -26,6 +26,7 @@ export interface LoadedTerminalRuntime {
 
 export interface CreateTerminalRuntimeOptions {
   fontFamily: string;
+  fontSizeAdjustment?: number;
 }
 
 export function createTerminalRuntime(
@@ -37,6 +38,7 @@ export function createTerminalRuntime(
     convertEol: true,
     fontFamily: options.fontFamily,
     fontSize: getPreferredTerminalFontSize({
+      adjustment: options.fontSizeAdjustment,
       mountWidth: mount.clientWidth,
       viewportWidth: window.innerWidth,
     }),

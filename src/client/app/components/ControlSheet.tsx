@@ -21,11 +21,14 @@ export interface ControlSheetProps {
   availability: Record<PathLevel, boolean>;
   currentLabels: Record<PathLevel, string | null>;
   fontMode: TerminalFontMode;
+  fontSize: number;
   level: NavScope;
   onCreate(level: PathLevel, name: string): Promise<void>;
   onClose(): void;
+  onDecreaseFontSize(): void;
   onDelete(level: PathLevel): Promise<void>;
   onFontModeChange(mode: TerminalFontMode): void;
+  onIncreaseFontSize(): void;
   onLevelChange(level: NavScope): void;
   onRename(level: PathLevel, name: string): Promise<void>;
   open: boolean;
@@ -36,11 +39,14 @@ export function ControlSheet(props: ControlSheetProps) {
     availability,
     currentLabels,
     fontMode,
+    fontSize,
     level,
     onClose,
     onCreate,
+    onDecreaseFontSize,
     onDelete,
     onFontModeChange,
+    onIncreaseFontSize,
     onLevelChange,
     onRename,
     open,
@@ -242,6 +248,20 @@ export function ControlSheet(props: ControlSheetProps) {
                   {option.label}
                 </button>
               ))}
+            </div>
+            <div className="control-sheet__field control-sheet__field--inline">
+              <span className="control-sheet__label">{`Size: ${fontSize}`}</span>
+              <div className="control-sheet__actions" role="group" aria-label="Terminal font size">
+                <button className="tab-button" type="button" title="Decrease font size" onClick={onDecreaseFontSize}>
+                  −
+                </button>
+                <span className="control-sheet__value" aria-live="polite">
+                  {fontSize}
+                </span>
+                <button className="tab-button" type="button" title="Increase font size" onClick={onIncreaseFontSize}>
+                  +
+                </button>
+              </div>
             </div>
           </div>
         </div>

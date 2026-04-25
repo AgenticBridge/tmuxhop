@@ -22,8 +22,10 @@ export function App() {
         fontMode={controller.fontMode}
         fontReport={controller.fontReport}
         onCreatePath={controller.onCreatePath}
+        onDecreaseTerminalFontSize={controller.onDecreaseTerminalFontSize}
         onDeletePath={controller.onDeletePath}
         onFontModeChange={controller.onFontModeChange}
+        onIncreaseTerminalFontSize={controller.onIncreaseTerminalFontSize}
         onReconnect={controller.onReconnect}
         onRefreshFontReport={controller.refreshFontReport}
         onRenamePath={controller.onRenamePath}
@@ -36,6 +38,7 @@ export function App() {
         selectedWindowPanes={controller.selectedWindowPanes}
         sessions={controller.sessions}
         status={controller.status}
+        terminalFontSize={controller.terminalFontSize}
         windows={controller.windows}
       />
 

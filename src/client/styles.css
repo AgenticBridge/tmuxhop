@@ -470,6 +470,11 @@ h1 {
   gap: 8px;
 }
 
+.control-sheet__field--inline {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
 .control-sheet__section {
   margin-top: 4px;
   padding-top: 12px;
@@ -528,6 +533,19 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+.control-sheet__value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--accent-dark);
+  font-weight: 700;
 }
 
 .control-sheet__editor {

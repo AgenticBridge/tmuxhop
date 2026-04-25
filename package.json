@@ -19,7 +19,7 @@
     "xterm"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "Mobile-friendly local tmux handoff prototype",
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",

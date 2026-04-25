@@ -9,6 +9,8 @@
 import { TERMINAL_FONT_STACK } from "./font-diagnostics.js";
 
 export type TerminalFontMode = "bundled" | "installed-nerd" | "system";
+export const MIN_TERMINAL_FONT_SIZE_ADJUSTMENT = -2;
+export const MAX_TERMINAL_FONT_SIZE_ADJUSTMENT = 6;
 
 export interface TerminalFontModeOption {
   description: string;
@@ -17,6 +19,7 @@ export interface TerminalFontModeOption {
 }
 
 const STORAGE_KEY = "tmuxhop.terminal-font-mode";
+const FONT_SIZE_ADJUSTMENT_STORAGE_KEY = "tmuxhop.terminal-font-size-adjustment";
 
 export const TERMINAL_FONT_MODE_OPTIONS: TerminalFontModeOption[] = [
   {
@@ -58,9 +61,9 @@ export function terminalFontModeNeedsBundledAsset(mode: TerminalFontMode): boole
 }
 
 export function loadTerminalFontMode(
-  storage: Pick<Storage, "getItem"> | undefined = globalThis.localStorage,
+  storage: Pick<Storage, "getItem"> | undefined = getSafeStorage(),
 ): TerminalFontMode {
-  const value = storage?.getItem(STORAGE_KEY);
+  const value = readStorageValue(storage, STORAGE_KEY);
   if (value === "bundled" || value === "installed-nerd" || value === "system") {
     return value;
   }
@@ -69,7 +72,68 @@ export function loadTerminalFontMode(
 
 export function saveTerminalFontMode(
   mode: TerminalFontMode,
-  storage: Pick<Storage, "setItem"> | undefined = globalThis.localStorage,
+  storage: Pick<Storage, "setItem"> | undefined = getSafeStorage(),
 ) {
-  storage?.setItem(STORAGE_KEY, mode);
+  writeStorageValue(storage, STORAGE_KEY, mode);
+}
+
+export function clampTerminalFontSizeAdjustment(adjustment: number): number {
+  return Math.max(
+    MIN_TERMINAL_FONT_SIZE_ADJUSTMENT,
+    Math.min(MAX_TERMINAL_FONT_SIZE_ADJUSTMENT, Math.trunc(adjustment)),
+  );
+}
+
+export function loadTerminalFontSizeAdjustment(
+  storage: Pick<Storage, "getItem"> | undefined = getSafeStorage(),
+): number {
+  const value = readStorageValue(storage, FONT_SIZE_ADJUSTMENT_STORAGE_KEY);
+  const parsed = Number.parseInt(value ?? "", 10);
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+
+  return clampTerminalFontSizeAdjustment(parsed);
+}
+
+export function saveTerminalFontSizeAdjustment(
+  adjustment: number,
+  storage: Pick<Storage, "setItem"> | undefined = getSafeStorage(),
+) {
+  writeStorageValue(
+    storage,
+    FONT_SIZE_ADJUSTMENT_STORAGE_KEY,
+    String(clampTerminalFontSizeAdjustment(adjustment)),
+  );
+}
+
+function getSafeStorage(): Storage | undefined {
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return undefined;
+  }
+}
+
+function readStorageValue(
+  storage: Pick<Storage, "getItem"> | undefined,
+  key: string,
+): string | null {
+  try {
+    return storage?.getItem(key) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStorageValue(
+  storage: Pick<Storage, "setItem"> | undefined,
+  key: string,
+  value: string,
+) {
+  try {
+    storage?.setItem(key, value);
+  } catch {
+    // Ignore storage-restricted environments and keep the current in-memory state.
+  }
 }

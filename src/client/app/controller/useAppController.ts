@@ -24,8 +24,11 @@ import {
   type FontCompatibilityReport,
 } from "../../terminal/font-diagnostics.js";
 import {
+  clampTerminalFontSizeAdjustment,
   getTerminalFontStack,
+  loadTerminalFontSizeAdjustment,
   loadTerminalFontMode,
+  saveTerminalFontSizeAdjustment,
   saveTerminalFontMode,
   terminalFontModeNeedsBundledAsset,
   type TerminalFontMode,
@@ -41,6 +44,10 @@ export function useAppController(): AppController {
   const [navScope, setNavScope] = useState<NavScope>("panes");
   const [status, setStatus] = useState<StatusState>({ label: "Connecting", tone: "default" });
   const [fontMode, setFontMode] = useState<TerminalFontMode>(() => loadTerminalFontMode());
+  const [terminalFontSizeAdjustment, setTerminalFontSizeAdjustment] = useState<number>(() =>
+    loadTerminalFontSizeAdjustment(),
+  );
+  const [terminalFontSize, setTerminalFontSize] = useState(14);
   const [fontReport, setFontReport] = useState<FontCompatibilityReport>(
     createPendingFontCompatibilityReport,
   );
@@ -162,10 +169,12 @@ export function useAppController(): AppController {
 
   const terminal = useTerminal({
     fontFamily: terminalFontStack,
+    fontSizeAdjustment: terminalFontSizeAdjustment,
     fontMode,
     onInput: useCallback((data: string) => {
       sendSocketMessageRef.current({ type: "input", data });
     }, []),
+    onResolvedFontSizeChange: setTerminalFontSize,
     onTerminalSizeChange: useCallback((dimensions) => {
       sendSocketMessageRef.current({
         type: "resize",
@@ -229,6 +238,20 @@ export function useAppController(): AppController {
       setFontMode(mode);
       saveTerminalFontMode(mode);
       setFontReport(createPendingFontCompatibilityReport());
+    },
+    onDecreaseTerminalFontSize: () => {
+      setTerminalFontSizeAdjustment((currentAdjustment) => {
+        const nextAdjustment = clampTerminalFontSizeAdjustment(currentAdjustment - 1);
+        saveTerminalFontSizeAdjustment(nextAdjustment);
+        return nextAdjustment;
+      });
+    },
+    onIncreaseTerminalFontSize: () => {
+      setTerminalFontSizeAdjustment((currentAdjustment) => {
+        const nextAdjustment = clampTerminalFontSizeAdjustment(currentAdjustment + 1);
+        saveTerminalFontSizeAdjustment(nextAdjustment);
+        return nextAdjustment;
+      });
     },
     onReconnect: () => {
       void reconnectSelectedPane();
@@ -296,6 +319,7 @@ export function useAppController(): AppController {
     showEmptyState: sessions.showEmptyState,
     status,
     terminalMountRef: terminal.mountRef,
+    terminalFontSize,
     toggleFontModal: () => setFontModalOpen((open) => !open),
     windows: sessions.windows,
   };

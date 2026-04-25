@@ -27,12 +27,15 @@ export interface AppController {
   showEmptyState: boolean;
   status: StatusState;
   terminalMountRef: React.RefObject<HTMLDivElement | null>;
+  terminalFontSize: number;
   windows: WindowInfo[];
   closeFontModal(): void;
+  onDecreaseTerminalFontSize(): void;
   onReconnect(): void;
   onCreatePath(level: PathLevel, name: string): Promise<void>;
   onDeletePath(level: PathLevel): Promise<void>;
   onFontModeChange(mode: TerminalFontMode): void;
+  onIncreaseTerminalFontSize(): void;
   onRenamePath(level: PathLevel, name: string): Promise<void>;
   onSelectNavScope(scope: NavScope): void;
   onSelectPane(paneId: string): void;

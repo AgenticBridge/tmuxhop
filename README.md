@@ -2,14 +2,43 @@
 
 tmuxhop lets you continue the same local `tmux` session from your phone in a browser. It is built for short desk-to-phone hops when you want to keep coding momentum without installing a mobile app, setting up SSH on the phone, or starting a fresh shell.
 
-![tmuxhop hero](assets/tmuxhop-hero.svg)
+![tmuxhop logo](assets/full_logo.png)
+
+![tmuxhop background](assets/backgroud.png)
 
 ## Why Use It
 
-- Keep the same coding session alive when you step away from your desk.
-- Open it from a phone browser with no mobile app install.
-- Avoid phone-side SSH setup, key management, and extra client configuration.
-- Stay focused on continuity, not remote access administration.
+```text
+💻 vibe coding
+-> 💩 need to poop
+-> 📱 open tmuxhop on your phone
+-> 🤖 keep coding sitting on the bowl
+-> ✅ stay in flow
+```
+
+## Quickstart
+
+```sh
+git clone https://github.com/<your-org-or-user>/tmuxhop.git
+cd tmuxhop
+npm install
+tmux has-session 2>/dev/null || tmux new -d -s tmuxhop
+npm start
+```
+
+Open the app:
+
+```text
+http://127.0.0.1:3000/
+```
+
+For phone access on the same local network:
+
+```sh
+HOST=0.0.0.0 PORT=3000 npm start
+```
+
+Then open `http://<your-computer-ip>:3000/` from the phone browser.
 
 ## How It Works
 
@@ -30,45 +59,11 @@ By default, tmuxhop looks for:
 
 You can override those with:
 
-- `TMUX_BIN`
-- `TMUXHOP_SESSION`
-- `TMUXHOP_SCROLLBACK_LINES`
-- `HOST`
-- `PORT`
-
-## Installation
-
-```sh
-npm install
-```
-
-## Usage
-
-Start or reuse a tmux session:
-
-```sh
-tmux new -As tmuxhop
-```
-
-Start tmuxhop:
-
-```sh
-npm start
-```
-
-Open the app:
-
-```text
-http://127.0.0.1:3000/
-```
-
-For phone access on the same local network:
-
-```sh
-HOST=0.0.0.0 PORT=3000 npm start
-```
-
-Then open `http://<your-computer-ip>:3000/` from the phone browser.
+- `TMUX_BIN`: path to the `tmux` binary tmuxhop should use
+- `TMUXHOP_SESSION`: default session name tmuxhop should look for or suggest
+- `TMUXHOP_SCROLLBACK_LINES`: how many scrollback lines to keep in the browser terminal
+- `HOST`: which network interface the backend binds to
+- `PORT`: which port the backend serves on
 
 ## Security Model
 
@@ -111,4 +106,4 @@ npm run build
 
 ## License
 
-ISC
+MIT

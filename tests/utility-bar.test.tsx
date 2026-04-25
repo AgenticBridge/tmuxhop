@@ -421,6 +421,8 @@ describe("UtilityBar", () => {
 
   it("changes terminal font mode from the control sheet", () => {
     const onFontModeChange = vi.fn();
+    const onIncreaseTerminalFontSize = vi.fn();
+    const onDecreaseTerminalFontSize = vi.fn();
 
     Object.defineProperty(window, "ResizeObserver", {
       configurable: true,
@@ -440,8 +442,10 @@ describe("UtilityBar", () => {
           recommendedFonts: [],
         }}
         onCreatePath={vi.fn(async () => undefined)}
+        onDecreaseTerminalFontSize={onDecreaseTerminalFontSize}
         onDeletePath={vi.fn(async () => undefined)}
         onFontModeChange={onFontModeChange}
+        onIncreaseTerminalFontSize={onIncreaseTerminalFontSize}
         onReconnect={vi.fn()}
         onRefreshFontReport={vi.fn()}
         onRenamePath={vi.fn(async () => undefined)}
@@ -454,12 +458,20 @@ describe("UtilityBar", () => {
         selectedWindowPanes={[]}
         sessions={[{ name: "main", attached: true, windows: 1 }]}
         status={{ label: "Live", tone: "ok" }}
+        terminalFontSize={7}
         windows={[]}
       />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Controls" }));
     fireEvent.click(screen.getByRole("button", { name: "System Mono" }));
+    fireEvent.click(screen.getByTitle("Increase font size"));
+    fireEvent.click(screen.getByTitle("Decrease font size"));
+
     expect(onFontModeChange).toHaveBeenCalledWith("system");
+    expect(onIncreaseTerminalFontSize).toHaveBeenCalledTimes(1);
+    expect(onDecreaseTerminalFontSize).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("dialog", { name: "Controls" })).not.toBeNull();
+    expect(screen.getByText("Size: 7")).not.toBeNull();
   });
 });

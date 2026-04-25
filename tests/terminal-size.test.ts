@@ -23,11 +23,16 @@ describe("getPreferredTerminalFontSize", () => {
   });
 
   it("uses a denser size on phone widths", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(8);
+    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(7);
   });
 
   it("uses the densest size on very narrow phones", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(7);
+    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(6);
+  });
+
+  it("applies a user font-size adjustment on top of the responsive default", () => {
+    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390, adjustment: 2 })).toBe(9);
+    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360, adjustment: -4 })).toBe(4);
   });
 });
 

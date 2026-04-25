@@ -22,8 +22,10 @@ export interface UtilityBarProps {
   fontMode?: TerminalFontMode;
   fontReport: FontCompatibilityReport;
   onCreatePath(level: PathLevel, name: string): Promise<void>;
+  onDecreaseTerminalFontSize?(): void;
   onDeletePath(level: PathLevel): Promise<void>;
   onFontModeChange?(mode: TerminalFontMode): void;
+  onIncreaseTerminalFontSize?(): void;
   onReconnect(): void;
   onRefreshFontReport(): void;
   onRenamePath(level: PathLevel, name: string): Promise<void>;
@@ -36,6 +38,7 @@ export interface UtilityBarProps {
   selectedWindowPanes: WindowInfo["panes"];
   sessions: SessionSummary[];
   status: StatusState;
+  terminalFontSize?: number;
   windows: WindowInfo[];
 }
 
@@ -44,8 +47,10 @@ export function UtilityBar(props: UtilityBarProps) {
     fontMode = "bundled",
     fontReport,
     onCreatePath,
+    onDecreaseTerminalFontSize = () => {},
     onDeletePath,
     onFontModeChange = () => {},
+    onIncreaseTerminalFontSize = () => {},
     onReconnect,
     onRefreshFontReport,
     onRenamePath,
@@ -58,6 +63,7 @@ export function UtilityBar(props: UtilityBarProps) {
     selectedWindowPanes,
     sessions,
     status,
+    terminalFontSize = 14,
     windows,
   } = props;
   const [openPicker, setOpenPicker] = useState<PickerScope | null>(null);
@@ -288,11 +294,14 @@ export function UtilityBar(props: UtilityBarProps) {
           panes: selectedPane?.title ?? null,
         }}
         fontMode={fontMode}
+        fontSize={terminalFontSize}
         level={controlLevel}
         onCreate={onCreatePath}
         onClose={() => setControlOpen(false)}
+        onDecreaseFontSize={onDecreaseTerminalFontSize}
         onDelete={onDeletePath}
         onFontModeChange={onFontModeChange}
+        onIncreaseFontSize={onIncreaseTerminalFontSize}
         onLevelChange={setControlLevel}
         onRename={onRenamePath}
         open={controlOpen}

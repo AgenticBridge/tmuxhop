@@ -38,16 +38,19 @@ const onReadySpy = vi.fn();
 
 interface TerminalHarnessProps {
   fontFamily?: string;
+  fontSizeAdjustment?: number;
   fontMode?: "bundled" | "installed-nerd" | "system";
 }
 
 function TerminalHarness(props: TerminalHarnessProps = {}) {
   const {
     fontFamily = '"Tmuxhop Terminal Nerd Font", monospace',
+    fontSizeAdjustment = 0,
     fontMode = "bundled",
   } = props;
   const terminal = useTerminal({
     fontFamily,
+    fontSizeAdjustment,
     fontMode,
     onInput: onInputSpy,
     onReady: onReadySpy,
@@ -360,7 +363,60 @@ describe("useTerminal", () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(terminal.options.fontSize).toBe(8);
+    expect(terminal.options.fontSize).toBe(7);
+    expect(fit).toHaveBeenCalled();
+    expect(resize).toHaveBeenCalledWith(90, 30);
+  });
+
+  it("refits when the configured terminal font size changes from the settings pane", async () => {
+    vi.useFakeTimers();
+    fontDiagnosticsMock.ensureBundledTerminalFontReady.mockResolvedValue(undefined);
+
+    Object.defineProperty(window, "ResizeObserver", {
+      configurable: true,
+      value: ResizeObserverStub,
+    });
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 390,
+    });
+
+    const fit = vi.fn();
+    const resize = vi.fn();
+    const terminal = {
+      cols: 90,
+      rows: 30,
+      dispose: vi.fn(),
+      onData: vi.fn(),
+      options: { fontFamily: '"Tmuxhop Terminal Nerd Font", monospace', fontSize: 14 },
+      open: vi.fn(),
+      reset: vi.fn(),
+      resize,
+      write: vi.fn(),
+    };
+
+    runtimeMock.createTerminalRuntime.mockReturnValue({
+      fitAddon: { fit },
+      terminal,
+    });
+
+    const { container, rerender } = render(<TerminalHarness />);
+    const mount = container.firstElementChild as HTMLDivElement;
+    Object.defineProperty(mount, "clientWidth", {
+      configurable: true,
+      value: 390,
+    });
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+    fit.mockClear();
+    resize.mockClear();
+
+    rerender(<TerminalHarness fontSizeAdjustment={2} />);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(terminal.options.fontSize).toBe(9);
     expect(fit).toHaveBeenCalled();
     expect(resize).toHaveBeenCalledWith(90, 30);
   });
