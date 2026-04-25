@@ -143,9 +143,6 @@ export function UtilityBar(props: UtilityBarProps) {
     <>
       <header ref={barRef} className="utility-bar">
         <div className="utility-group utility-group--path">
-          <a className="logo-button" href="/" aria-label="Back to home">
-            ←
-          </a>
           <span
             id="connection-status"
             className="status-dot"

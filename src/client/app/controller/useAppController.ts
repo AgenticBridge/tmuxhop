@@ -34,14 +34,13 @@ import {
   type TerminalFontMode,
 } from "../../terminal/settings.js";
 import { useTerminal } from "../hooks/useTerminal.js";
-import type { NavScope, StatusState, StatusTone } from "../ui.js";
+import type { StatusState, StatusTone } from "../ui.js";
 import type { AppController } from "./types.js";
 import { usePaneConnection } from "./usePaneConnection.js";
 import { useRequestGuards } from "./useRequestGuards.js";
 import { useSessions } from "./useSessions.js";
 
 export function useAppController(): AppController {
-  const [navScope, setNavScope] = useState<NavScope>("panes");
   const [status, setStatus] = useState<StatusState>({ label: "Connecting", tone: "default" });
   const [fontMode, setFontMode] = useState<TerminalFontMode>(() => loadTerminalFontMode());
   const [terminalFontSizeAdjustment, setTerminalFontSizeAdjustment] = useState<number>(() =>
@@ -51,7 +50,6 @@ export function useAppController(): AppController {
   const [fontReport, setFontReport] = useState<FontCompatibilityReport>(
     createPendingFontCompatibilityReport,
   );
-  const [fontModalOpen, setFontModalOpen] = useState(false);
   const sendSocketMessageRef = useRef<(payload: ClientSocketMessage) => void>(() => {});
 
   const requestGuards = useRequestGuards({
@@ -200,11 +198,8 @@ export function useAppController(): AppController {
   sendSocketMessageRef.current = paneConnection.sendSocketMessage;
 
   return {
-    closeFontModal: () => setFontModalOpen(false),
     fontMode,
-    fontModalOpen,
     fontReport,
-    navScope,
     onCreatePath: async (level: PathLevel, name: string) => {
       const response = await mutatePath({
         action: "create",
@@ -274,7 +269,6 @@ export function useAppController(): AppController {
         refreshSessions: level === "sessions",
       });
     },
-    onSelectNavScope: setNavScope,
     onSelectPane: (paneId: string) => {
       sessions.selectPane(paneId);
       requestGuards.runTask(async () => {
@@ -286,7 +280,6 @@ export function useAppController(): AppController {
         return;
       }
       sessions.selectSession(sessionName);
-      setNavScope("windows");
       requestGuards.runTask(async () => {
         const { selectedPaneId } = await sessions.loadWindowsForSelectedSession({ sessionName });
         await paneConnection.attachSelectedPane({ paneId: selectedPaneId });
@@ -294,7 +287,6 @@ export function useAppController(): AppController {
     },
     onSelectWindow: (windowId: string) => {
       const { selectedPaneId } = sessions.selectWindow(windowId);
-      setNavScope("panes");
       requestGuards.runTask(async () => {
         await paneConnection.attachSelectedPane({ paneId: selectedPaneId });
       });
@@ -312,7 +304,6 @@ export function useAppController(): AppController {
     selectedSessionName: sessions.selectedSessionName,
     selectedWindowId: sessions.selectedWindowId,
     selectedWindowPanes: sessions.selectedWindowPanes,
-    sessionTitle: sessions.sessionTitle,
     sessions: sessions.sessions,
     showApp: sessions.showApp,
     showControls: sessions.showControls,
@@ -320,7 +311,6 @@ export function useAppController(): AppController {
     status,
     terminalMountRef: terminal.mountRef,
     terminalFontSize,
-    toggleFontModal: () => setFontModalOpen((open) => !open),
     windows: sessions.windows,
   };
 }

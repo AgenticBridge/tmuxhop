@@ -44,7 +44,6 @@ export interface UseSessionsResult {
   selectedSessionName: string | null;
   selectedWindowId: string | null;
   selectedWindowPanes: WindowInfo["panes"];
-  sessionTitle: string;
   sessions: SessionSummary[];
   showApp: boolean;
   showControls: boolean;
@@ -72,7 +71,6 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
   const [windows, setWindows] = useState<WindowInfo[]>([]);
   const [selectedWindowId, setSelectedWindowId] = useState<string | null>(null);
   const [selectedPaneId, setSelectedPaneId] = useState<string | null>(null);
-  const [sessionTitle, setSessionTitle] = useState("Shared Session");
   const [showEmptyState, setShowEmptyState] = useState(false);
   const [showApp, setShowApp] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -114,7 +112,6 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     setSelectedSessionName(null);
     setSelectedWindowId(null);
     setSelectedPaneId(null);
-    setSessionTitle("No Sessions");
     setShowEmptyState(true);
     setShowApp(false);
     setShowControls(false);
@@ -170,7 +167,6 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
       setShowEmptyState(true);
       setShowApp(false);
       setShowControls(false);
-      setSessionTitle("Select Session");
       onStatusChange("Missing", "warn");
       return { selectedPaneId: null };
     }
@@ -182,8 +178,6 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     if (!requestGuards.isCurrentRequestRevision(requestRevision)) {
       return { selectedPaneId: null };
     }
-
-    setSessionTitle(windowsPayload.sessionName || "Shared Session");
 
     if (!windowsPayload.exists) {
       const sessionsPayload = await fetchSessionsPayload();
@@ -328,7 +322,6 @@ export function useSessions(options: UseSessionsOptions): UseSessionsResult {
     selectedSessionName,
     selectedWindowId,
     selectedWindowPanes,
-    sessionTitle,
     sessions,
     showApp,
     showControls,
