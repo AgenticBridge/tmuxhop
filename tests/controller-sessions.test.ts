@@ -53,7 +53,6 @@ describe("useSessions", () => {
     expect(result.current.showEmptyState).toBe(true);
     expect(result.current.showApp).toBe(false);
     expect(result.current.showControls).toBe(false);
-    expect(result.current.sessionTitle).toBe("No Sessions");
     expect(onStatusChange).toHaveBeenCalledWith("Missing", "warn");
   });
 
@@ -235,7 +234,6 @@ describe("useSessions", () => {
     );
     await firstLoad;
 
-    expect(result.current.sessionTitle).toBe("beta");
     expect(result.current.selectedPaneId).toBe("%2");
     expect(result.current.windows[0]?.name).toBe("beta");
   });

@@ -63,7 +63,6 @@ vi.mock("../src/client/app/controller/useSessions.js", () => ({
     selectedSessionName: "tmuxhop",
     selectedWindowId: "@1",
     selectedWindowPanes: [],
-    sessionTitle: "tmuxhop",
     sessions: [{ name: "tmuxhop", attached: true, windows: 1 }],
     showApp: true,
     showControls: true,

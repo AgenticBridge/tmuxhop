@@ -9,18 +9,15 @@
 import type { PathLevel, SessionSummary, WindowInfo } from "../../../server/protocol.js";
 import type { FontCompatibilityReport } from "../../terminal/font-diagnostics.js";
 import type { TerminalFontMode } from "../../terminal/settings.js";
-import type { NavScope, StatusState } from "../ui.js";
+import type { StatusState } from "../ui.js";
 
 export interface AppController {
-  fontModalOpen: boolean;
   fontMode: TerminalFontMode;
   fontReport: FontCompatibilityReport;
-  navScope: NavScope;
   selectedPaneId: string | null;
   selectedSessionName: string | null;
   selectedWindowId: string | null;
   selectedWindowPanes: WindowInfo["panes"];
-  sessionTitle: string;
   sessions: SessionSummary[];
   showApp: boolean;
   showControls: boolean;
@@ -29,7 +26,6 @@ export interface AppController {
   terminalMountRef: React.RefObject<HTMLDivElement | null>;
   terminalFontSize: number;
   windows: WindowInfo[];
-  closeFontModal(): void;
   onDecreaseTerminalFontSize(): void;
   onReconnect(): void;
   onCreatePath(level: PathLevel, name: string): Promise<void>;
@@ -37,14 +33,12 @@ export interface AppController {
   onFontModeChange(mode: TerminalFontMode): void;
   onIncreaseTerminalFontSize(): void;
   onRenamePath(level: PathLevel, name: string): Promise<void>;
-  onSelectNavScope(scope: NavScope): void;
   onSelectPane(paneId: string): void;
   onSelectSession(sessionName: string): void;
   onSelectWindow(windowId: string): void;
   onShortcut(input: string): void;
   onTextInput(data: string): void;
   refreshFontReport(): void;
-  toggleFontModal(): void;
 }
 
 export interface LatestAppSelectionState {
