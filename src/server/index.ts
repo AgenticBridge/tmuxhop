@@ -128,7 +128,7 @@ export function createApp(dependencies: ServerDependencies = defaultDependencies
   });
 
   app.get("/app", (_req: Request, res: Response) => {
-    res.sendFile(path.join(clientPagesDir, "app.html"));
+    res.redirect(302, "/");
   });
 
   app.get("/api/sessions", async (_req: Request, res: Response<SessionsResponse>, next: NextFunction) => {

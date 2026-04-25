@@ -27,7 +27,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: path.join(__dirname, "src", "client", "pages", "index.html"),
-        app: path.join(__dirname, "src", "client", "pages", "app.html"),
       },
       output: {
         entryFileNames: "assets/[name].js",

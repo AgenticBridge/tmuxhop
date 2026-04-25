@@ -1,0 +1,91 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="171" y1="84" x2="1388" y2="836" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBF6EA"/>
+      <stop offset="1" stop-color="#EFE1CE"/>
+    </linearGradient>
+    <radialGradient id="wash" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(260 120) rotate(33.6) scale(529.22 700.715)">
+      <stop stop-color="#F38A55" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#F38A55" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="desktop" x1="910" y1="238" x2="1254" y2="628" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#171411"/>
+      <stop offset="1" stop-color="#262019"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="1088" y1="274" x2="1276" y2="640" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#181411"/>
+      <stop offset="1" stop-color="#2B241C"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="896" y1="262" x2="1232" y2="642" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF9054"/>
+      <stop offset="1" stop-color="#C14A19"/>
+    </linearGradient>
+    <filter id="frameShadow" x="151" y="73" width="1298" height="756" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#181512" flood-opacity="0.14"/>
+    </filter>
+    <filter id="deviceShadow" x="836" y="151" width="524" height="620" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#181512" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="#F4EEE3"/>
+  <rect width="1600" height="900" fill="url(#wash)"/>
+
+  <g filter="url(#frameShadow)">
+    <rect x="176" y="100" width="1248" height="626" rx="42" fill="url(#bg)"/>
+  </g>
+
+  <circle cx="226" cy="144" r="10" fill="#D96A35"/>
+  <circle cx="258" cy="144" r="10" fill="#DAB34A"/>
+  <circle cx="290" cy="144" r="10" fill="#5B9964"/>
+  <path d="M176 176H1424" stroke="#E8D9C6" stroke-width="2"/>
+
+  <g>
+    <text x="250" y="270" fill="#8B3816" font-family="Georgia, 'Times New Roman', serif" font-size="26" letter-spacing="4">TMUXHOP</text>
+    <text x="250" y="364" fill="#181512" font-family="Georgia, 'Times New Roman', serif" font-size="80" font-weight="700">
+      Keep the same
+    </text>
+    <text x="250" y="448" fill="#181512" font-family="Georgia, 'Times New Roman', serif" font-size="80" font-weight="700">
+      coding flow when
+    </text>
+    <text x="250" y="532" fill="#181512" font-family="Georgia, 'Times New Roman', serif" font-size="80" font-weight="700">
+      you step away.
+    </text>
+    <text x="250" y="602" fill="#64594F" font-family="'SFMono-Regular', Consolas, monospace" font-size="28">
+      Same tmux session. Phone browser only. No mobile app. No phone-side SSH setup.
+    </text>
+  </g>
+
+  <rect x="250" y="648" width="292" height="64" rx="32" fill="#CC5C2A"/>
+  <text x="315" y="690" fill="#FFFDF8" font-family="'SFMono-Regular', Consolas, monospace" font-size="28" font-weight="700">Hop back into work</text>
+
+  <g filter="url(#deviceShadow)">
+    <rect x="900" y="206" width="306" height="204" rx="26" fill="url(#desktop)"/>
+    <rect x="922" y="228" width="262" height="160" rx="18" fill="#101010"/>
+    <rect x="1062" y="396" width="34" height="12" rx="6" fill="#5C5045"/>
+    <rect x="1094" y="270" width="186" height="352" rx="36" fill="url(#phone)"/>
+    <rect x="1107" y="287" width="160" height="318" rx="24" fill="#111111"/>
+    <rect x="1166" y="275" width="42" height="6" rx="3" fill="#594D42"/>
+  </g>
+
+  <g>
+    <text x="948" y="282" fill="#FF9054" font-family="'SFMono-Regular', Consolas, monospace" font-size="22">&gt; tmux attach -t tmuxhop</text>
+    <text x="948" y="324" fill="#F2F2EB" font-family="'SFMono-Regular', Consolas, monospace" font-size="21">main / editor / %1</text>
+    <text x="948" y="356" fill="#A8A299" font-family="'SFMono-Regular', Consolas, monospace" font-size="20">implementing mobile terminal UX</text>
+
+    <text x="1132" y="364" fill="#FF9054" font-family="'SFMono-Regular', Consolas, monospace" font-size="18">&gt; same session</text>
+    <text x="1132" y="399" fill="#F2F2EB" font-family="'SFMono-Regular', Consolas, monospace" font-size="17">main &gt; editor &gt; %1</text>
+    <text x="1132" y="432" fill="#A8A299" font-family="'SFMono-Regular', Consolas, monospace" font-size="16">browser control bar</text>
+    <text x="1132" y="465" fill="#F2F2EB" font-family="'SFMono-Regular', Consolas, monospace" font-size="16">live output</text>
+    <rect x="1132" y="488" width="98" height="3" rx="1.5" fill="#CC5C2A"/>
+    <text x="1132" y="540" fill="#A8A299" font-family="'SFMono-Regular', Consolas, monospace" font-size="16">desk → phone hop</text>
+  </g>
+
+  <path d="M1208 298C1244 314 1273 342 1292 382C1306 412 1312 442 1311 474" stroke="url(#accent)" stroke-width="16" stroke-linecap="round"/>
+  <path d="M1294 463L1315 483L1290 491" stroke="url(#accent)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g opacity="0.72">
+    <path d="M866 260C848 297 840 339 844 380" stroke="#D8C2A9" stroke-width="3" stroke-dasharray="8 10" stroke-linecap="round"/>
+    <path d="M857 566C879 545 896 519 907 490" stroke="#D8C2A9" stroke-width="3" stroke-dasharray="8 10" stroke-linecap="round"/>
+  </g>
+</svg>
