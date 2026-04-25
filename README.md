@@ -1,8 +1,26 @@
-# tmuxhop
+<p align="center">
+  <img src="assets/full_logo.png" alt="tmuxhop logo" width="180">
+</p>
+<p align="center"> Keep coding when life pulls you away.</p>
 
-tmuxhop lets you continue the same local `tmux` session from your phone in a browser. It is built for short desk-to-phone hops when you want to keep coding momentum without installing a mobile app, setting up SSH on the phone, or starting a fresh shell.
+<p align="center">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-7FBF4D">
+  <img alt="Node.js 22+" src="https://img.shields.io/badge/node-22%2B-2D2D2D">
+  <img alt="tmux required" src="https://img.shields.io/badge/terminal-tmux-EA8A4A">
+  <img alt="LAN or VPN" src="https://img.shields.io/badge/network-LAN%20or%20VPN-5A9E57">
+</p>
 
-![tmuxhop logo](assets/full_logo.png)
+<p align="center">
+  English |
+  <a href="README.zh-TW.md">繁體中文</a> |
+  <a href="README.ja.md">日本語</a> |
+  <a href="README.ko.md">한국어</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.fr.md">Français</a>
+</p>
+
+> [!IMPORTANT]
+> tmuxhop is designed for trusted networks only. It exposes your live terminal to other clients on the network without authentication. Run it only on the same machine, a trusted LAN, or a VPN. See [SECURITY.md](SECURITY.md).
 
 ![tmuxhop background](assets/backgroud.png)
 
@@ -12,7 +30,7 @@ tmuxhop lets you continue the same local `tmux` session from your phone in a bro
 💻 vibe coding
 -> 💩 need to poop
 -> 📱 open tmuxhop on your phone
--> 🤖 keep coding sitting on the bowl
+-> 🤖 keep coding while sitting on the bowl
 -> ✅ stay in flow
 ```
 
@@ -64,18 +82,6 @@ You can override those with:
 - `TMUXHOP_SCROLLBACK_LINES`: how many scrollback lines to keep in the browser terminal
 - `HOST`: which network interface the backend binds to
 - `PORT`: which port the backend serves on
-
-## Security Model
-
-tmuxhop is intentionally lightweight. It does not ask you to set up mobile SSH or expose a general remote shell service to the internet.
-
-Use it on:
-
-- the same machine
-- a trusted local network
-- or a VPN
-
-Do not treat it as a hardened public internet service in its current form.
 
 ## Limits
 
