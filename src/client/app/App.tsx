@@ -13,6 +13,8 @@ import { UtilityBar } from "./components/UtilityBar.js";
 import { useAppController } from "./controller/useAppController.js";
 import { CONTROL_BUTTONS } from "./ui.js";
 
+const APP_VERSION = "0.1.0";
+
 export function App() {
   const controller = useAppController();
 
@@ -39,6 +41,7 @@ export function App() {
         sessions={controller.sessions}
         status={controller.status}
         terminalFontSize={controller.terminalFontSize}
+        version={APP_VERSION}
         windows={controller.windows}
       />
 
