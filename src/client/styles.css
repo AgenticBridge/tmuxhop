@@ -533,6 +533,13 @@ h1 {
   line-height: 1.4;
 }
 
+.control-sheet__meta {
+  margin: 2px 0 0;
+  color: rgba(24, 21, 18, 0.48);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
 .terminal-panel {
   min-height: 0;
   display: grid;

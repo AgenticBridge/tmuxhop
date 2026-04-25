@@ -32,6 +32,7 @@ export interface ControlSheetProps {
   onLevelChange(level: NavScope): void;
   onRename(level: PathLevel, name: string): Promise<void>;
   open: boolean;
+  version: string;
 }
 
 export function ControlSheet(props: ControlSheetProps) {
@@ -50,6 +51,7 @@ export function ControlSheet(props: ControlSheetProps) {
     onLevelChange,
     onRename,
     open,
+    version,
   } = props;
   const [draftName, setDraftName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -264,6 +266,9 @@ export function ControlSheet(props: ControlSheetProps) {
               </div>
             </div>
           </div>
+          <p className="control-sheet__meta" aria-label={`Version ${version}`}>
+            Version {version}
+          </p>
         </div>
       </section>
     </div>

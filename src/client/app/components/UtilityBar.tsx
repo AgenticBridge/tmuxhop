@@ -39,6 +39,7 @@ export interface UtilityBarProps {
   sessions: SessionSummary[];
   status: StatusState;
   terminalFontSize?: number;
+  version?: string;
   windows: WindowInfo[];
 }
 
@@ -64,6 +65,7 @@ export function UtilityBar(props: UtilityBarProps) {
     sessions,
     status,
     terminalFontSize = 14,
+    version = "0.0.0",
     windows,
   } = props;
   const [openPicker, setOpenPicker] = useState<PickerScope | null>(null);
@@ -302,6 +304,7 @@ export function UtilityBar(props: UtilityBarProps) {
         onLevelChange={setControlLevel}
         onRename={onRenamePath}
         open={controlOpen}
+        version={version}
       />
     </>
   );
