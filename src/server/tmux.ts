@@ -23,6 +23,8 @@ const execFileAsync = promisify(execFile);
 export const DEFAULT_SESSION =
   process.env.TMUXHOP_SESSION || "tmuxhop";
 export const TMUX_BIN = process.env.TMUX_BIN || "/opt/homebrew/bin/tmux";
+export const TMUX_SOCKET = process.env.TMUX_SOCKET || "";
+export const TMUX_SOCKET = process.env.TMUX_SOCKET || "";
 export const DEFAULT_SCROLLBACK_LINES = Number(
   process.env.TMUXHOP_SCROLLBACK_LINES || 1000,
 );
@@ -58,7 +60,8 @@ interface RawSessionRow {
 
 export async function runTmux(args: string[]): Promise<string> {
   try {
-    const { stdout } = await execFileAsync(TMUX_BIN, args, {
+    const tmuxArgs = TMUX_SOCKET ? ["-L", TMUX_SOCKET, ...args] : args;
+    const { stdout } = await execFileAsync(TMUX_BIN, tmuxArgs, {
       maxBuffer: 1024 * 1024 * 8,
     });
     return stdout.trimEnd();
