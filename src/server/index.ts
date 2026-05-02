@@ -412,7 +412,13 @@ export function createServer(dependencies: ServerDependencies = defaultDependenc
       return;
     }
 
-    const paneId = decodeURIComponent(match[1] ?? "");
+    const rawPaneId = match[1] ?? "";
+    let paneId = rawPaneId;
+    try {
+      paneId = decodeURIComponent(rawPaneId);
+    } catch {
+      // paneId may contain raw % that wasn't encoded; use as-is
+    }
     const streamOptions = parsePaneStreamOptions(url);
     webSocketServer.handleUpgrade(request, socket, head, (webSocket) => {
       void handlePaneSocket(webSocket, paneId, dependencies, streamOptions);
