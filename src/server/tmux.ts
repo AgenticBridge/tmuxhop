@@ -24,7 +24,6 @@ export const DEFAULT_SESSION =
   process.env.TMUXHOP_SESSION || "tmuxhop";
 export const TMUX_BIN = process.env.TMUX_BIN || "/opt/homebrew/bin/tmux";
 export const TMUX_SOCKET = process.env.TMUX_SOCKET || "";
-export const TMUX_SOCKET = process.env.TMUX_SOCKET || "";
 export const DEFAULT_SCROLLBACK_LINES = Number(
   process.env.TMUXHOP_SCROLLBACK_LINES || 1000,
 );
