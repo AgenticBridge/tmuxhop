@@ -51,19 +51,11 @@ export function ControlBar(props: ControlBarProps) {
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <div className="control-bar__actions">
-          <button className="control-bar__text-button" type="button" onClick={sendDraft}>
-            Send
-          </button>
-          <button
-            className="control-bar__hint-button"
-            type="button"
-            onClick={sendDraft}
-            title="Alt+Enter"
-          >
-            Alt+Enter
-          </button>
-        </div>
+      <div className="control-bar__actions">
+        <button className="control-bar__text-button" type="button" onClick={sendDraft}>
+          Send
+        </button>
+      </div>
       </div>
 
       <div className="control-bar__shortcuts">
@@ -73,7 +65,13 @@ export function ControlBar(props: ControlBarProps) {
             type="button"
             title={definition.title}
             aria-label={definition.title}
-            onClick={() => onShortcut(definition.input)}
+            onClick={() => {
+              if (definition.input === "__ALT_ENTER__") {
+                sendDraft();
+              } else {
+                onShortcut(definition.input);
+              }
+            }}
           >
             {definition.label}
           </button>

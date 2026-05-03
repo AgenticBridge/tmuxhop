@@ -685,7 +685,11 @@ h1 {
 @media (max-width: 760px) {
   .landing-shell,
   .app-shell {
-    width: min(100vw - 20px, 1100px);
+    width: 100%;
+    max-width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow-x: hidden;
   }
 
   .hero-card {
@@ -711,8 +715,4 @@ h1 {
   }
 }
 
-@media (min-width: 761px) {
-  .control-bar__text-entry {
-    display: none;
-  }
-}
+/* 始终显示文本框和Send按钮，移除桌面端隐藏规则 */
