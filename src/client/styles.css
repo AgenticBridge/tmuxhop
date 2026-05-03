@@ -302,7 +302,6 @@ h1 {
 
 .empty-state,
 .terminal-panel {
-  border-radius: 22px;
   padding: 8px;
 }
 
@@ -553,7 +552,6 @@ h1 {
   height: 100%;
   background: var(--terminal);
   color: var(--terminal-ink);
-  border-radius: 16px;
   padding: 5px;
   overflow: hidden;
 }
@@ -627,6 +625,9 @@ h1 {
   background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
   font: inherit;
+  resize: vertical;
+  min-height: 60px;
+  field-sizing: normal;
 }
 
 .control-bar__text-button {
