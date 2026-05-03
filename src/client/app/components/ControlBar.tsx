@@ -31,8 +31,8 @@ export function ControlBar(props: ControlBarProps) {
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Ctrl+Enter or Cmd+Enter to submit
-    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    // Ctrl+Enter or Cmd+Enter or Alt+Enter to submit
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey || event.altKey)) {
       event.preventDefault();
       sendDraft();
     }
@@ -45,7 +45,7 @@ export function ControlBar(props: ControlBarProps) {
         <textarea
           aria-label="Mobile terminal input"
           className="control-bar__text-input"
-          placeholder="Type for terminal (Ctrl+Enter to send)"
+          placeholder="Type for terminal (Ctrl/Cmd/Alt+Enter to send)"
           value={draft}
           rows={3}
           onChange={(event) => setDraft(event.target.value)}
