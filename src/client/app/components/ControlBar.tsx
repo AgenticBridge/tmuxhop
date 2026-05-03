@@ -45,15 +45,25 @@ export function ControlBar(props: ControlBarProps) {
         <textarea
           aria-label="Mobile terminal input"
           className="control-bar__text-input"
-          placeholder="Type for terminal (Ctrl/Cmd/Alt+Enter to send)"
+          placeholder="Type for terminal"
           value={draft}
           rows={3}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <button className="control-bar__text-button" type="button" onClick={sendDraft}>
-          Send
-        </button>
+        <div className="control-bar__actions">
+          <button className="control-bar__text-button" type="button" onClick={sendDraft}>
+            Send
+          </button>
+          <button
+            className="control-bar__hint-button"
+            type="button"
+            onClick={sendDraft}
+            title="Alt+Enter"
+          >
+            Alt+Enter
+          </button>
+        </div>
       </div>
 
       <div className="control-bar__shortcuts">

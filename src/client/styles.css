@@ -634,6 +634,33 @@ h1 {
   flex: 0 0 auto;
 }
 
+.control-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-bar__hint-button {
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.control-bar__hint-button:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+}
+
+.control-bar__hint-button:active {
+  transform: scale(0.96);
+}
+
 .control-bar__shortcuts {
   display: flex;
   gap: 8px;

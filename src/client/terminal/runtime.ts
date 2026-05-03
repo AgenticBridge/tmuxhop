@@ -70,19 +70,25 @@ export function createTerminalRuntime(
 
   const handleTouchStart = (e: TouchEvent) => {
     if (e.touches.length === 1) {
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
+      const touch = e.touches[0];
+      if (touch) {
+        touchStartY = touch.clientY;
+        touchStartX = touch.clientX;
+      }
     }
   };
 
   const handleTouchMove = (e: TouchEvent) => {
     if (e.touches.length !== 1) return;
 
-    const touchY = e.touches[0].clientY;
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const touchY = touch.clientY;
     const deltaY = touchStartY - touchY; // Positive = scrolling down
 
     // Only handle vertical scroll (ignore horizontal swipes)
-    const touchX = e.touches[0].clientX;
+    const touchX = touch.clientX;
     const deltaX = Math.abs(touchX - touchStartX);
     if (deltaX > Math.abs(deltaY)) return; // Horizontal swipe, ignore
 

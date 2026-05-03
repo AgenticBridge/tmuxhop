@@ -18,9 +18,9 @@ export interface TerminalDimensions {
 const MIN_COLS = 20;
 const MIN_ROWS = 8;
 const DESKTOP_FONT_SIZE = 14;
-const TABLET_FONT_SIZE = 11;
-const PHONE_FONT_SIZE = 7;
-const PHONE_NARROW_FONT_SIZE = 6;
+const TABLET_FONT_SIZE = 13;
+const PHONE_FONT_SIZE = 12;
+const PHONE_NARROW_FONT_SIZE = 11;
 const MIN_FONT_SIZE = 4;
 const MAX_FONT_SIZE = 24;
 
