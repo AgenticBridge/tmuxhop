@@ -185,8 +185,11 @@ export function createApp(dependencies: ServerDependencies = defaultDependencies
   );
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    console.error('Unhandled error:', errorObj.message, errorObj.stack);
     res.status(500).json({
-      error: error instanceof Error ? error.message : "Unexpected server error",
+      error: errorObj.message,
+      stack: process.env.NODE_ENV === 'development' ? errorObj.stack : undefined,
     });
   });
 
