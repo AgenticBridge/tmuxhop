@@ -22,14 +22,12 @@ export function ControlBar(props: ControlBarProps) {
   const [draft, setDraft] = useState("");
 
   function sendDraft() {
-    if (draft.trim()) {
-      // If there's text, send it
-      onTextInput(draft);
-      setDraft("");
-    } else {
-      // If empty, send Enter key (for Alt+Enter button behavior)
-      onTextInput("\r");
+    if (!draft.trim()) {
+      return;  // Do nothing if empty
     }
+    
+    onTextInput(draft);  // Only send text, no Enter key
+    setDraft("");
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
