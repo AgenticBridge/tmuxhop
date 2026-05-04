@@ -22,12 +22,14 @@ export function ControlBar(props: ControlBarProps) {
   const [draft, setDraft] = useState("");
 
   function sendDraft() {
-    if (!draft.trim()) {
-      return;
+    if (draft.trim()) {
+      // If there's text, send it
+      onTextInput(draft);
+      setDraft("");
+    } else {
+      // If empty, send Enter key (for Alt+Enter button behavior)
+      onTextInput("\r");
     }
-
-    onTextInput(draft);
-    setDraft("");
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -65,13 +67,7 @@ export function ControlBar(props: ControlBarProps) {
             type="button"
             title={definition.title}
             aria-label={definition.title}
-            onClick={() => {
-              if (definition.input === "__ALT_ENTER__") {
-                sendDraft();
-              } else {
-                onShortcut(definition.input);
-              }
-            }}
+            onClick={() => onShortcut(definition.input)}
           >
             {definition.label}
           </button>

@@ -16,6 +16,7 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import compression from "compression";
 import { WebSocketServer, type WebSocket } from "ws";
 
 import type {
@@ -120,8 +121,29 @@ export async function buildWindowsResponse(
 export function createApp(dependencies: ServerDependencies = defaultDependencies) {
   const app = express();
 
+  // Enable compression for all responses
+  app.use(compression({
+    threshold: 0, // Compress all responses (even small ones)
+  }));
+
   app.use(express.json());
-  app.use(express.static(clientDistDir));
+
+  // Serve static assets with aggressive caching
+  app.use(express.static(clientDistDir, {
+    maxAge: '1y', // Cache static assets for 1 year
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+      // Set long cache for assets (hashed filenames)
+      if (filePath.includes('/assets/')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      // HTML files - no cache (they reference assets)
+      else if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  }));
 
   app.get("/", (_req: Request, res: Response) => {
     res.sendFile(path.join(clientPagesDir, "index.html"));

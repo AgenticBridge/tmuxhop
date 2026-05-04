@@ -27,7 +27,7 @@ export const CONTROL_BUTTONS: ControlButtonDefinition[] = [
   { label: "Esc", input: "\u001b", title: "Escape" },
   { label: "Tab", input: "\t", title: "Tab" },
   { label: "Ctrl+C", input: "\u0003", title: "Interrupt process" },
-  { label: "Alt+Enter", input: "__ALT_ENTER__", title: "Alt+Enter" },
+  { label: "Alt+Enter", input: "\u001b\r", title: "Alt+Enter (send to terminal)" },
   { label: "Ctrl+L", input: "\u000c", title: "Clear screen" },
   { label: "↑", input: "\u001b[A", title: "Arrow up" },
   { label: "←", input: "\u001b[D", title: "Arrow left" },
