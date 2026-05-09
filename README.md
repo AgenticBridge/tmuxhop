@@ -72,16 +72,28 @@ The goal is not full remote desktop access. The goal is to make it easy to hop t
 
 By default, tmuxhop looks for:
 
-- `tmux` at `/opt/homebrew/bin/tmux`
+- `tmux` on your `PATH`, then common macOS/Linux install locations:
+  `/opt/homebrew/bin/tmux`, `/usr/local/bin/tmux`, `/usr/bin/tmux`
 - a default session named `tmuxhop`
 
 You can override those with:
 
 - `TMUX_BIN`: path to the `tmux` binary tmuxhop should use
+- `TMUX_SOCKET`: tmux socket name (equivalent to `-L` flag, e.g., `tmux -L mysocket`)
 - `TMUXHOP_SESSION`: default session name tmuxhop should look for or suggest
 - `TMUXHOP_SCROLLBACK_LINES`: how many scrollback lines to keep in the browser terminal
 - `HOST`: which network interface the backend binds to
 - `PORT`: which port the backend serves on
+
+### Using a custom tmux socket
+
+If your tmux server was started with a custom socket name (e.g., `tmux -L mysocket`), set the `TMUX_SOCKET` environment variable:
+
+```sh
+TMUX_SOCKET=mysocket npm start
+```
+
+This is equivalent to passing `-L mysocket` to all tmux commands.
 
 ## Limits
 

@@ -22,34 +22,41 @@ export function ControlBar(props: ControlBarProps) {
   const [draft, setDraft] = useState("");
 
   function sendDraft() {
-    if (!draft) {
-      return;
+    if (!draft.trim()) {
+      return;  // Do nothing if empty
     }
-
-    onTextInput(draft);
+    
+    onTextInput(draft);  // Only send text, no Enter key
     setDraft("");
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    sendDraft();
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // Ctrl+Enter or Cmd+Enter or Alt+Enter to submit
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey || event.altKey)) {
+      event.preventDefault();
+      sendDraft();
+    }
+    // Enter alone does nothing (allows new line)
   }
 
   return (
     <footer id="controls" className={`control-bar${showControls ? "" : " hidden"}`}>
-      <form className="control-bar__text-entry" onSubmit={handleSubmit}>
-        <input
+      <div className="control-bar__text-entry">
+        <textarea
           aria-label="Mobile terminal input"
           className="control-bar__text-input"
           placeholder="Type for terminal"
-          type="text"
           value={draft}
+          rows={3}
           onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={handleKeyDown}
         />
-        <button className="control-bar__text-button" type="submit">
-          Run
+      <div className="control-bar__actions">
+        <button className="control-bar__text-button" type="button" onClick={sendDraft}>
+          Send
         </button>
-      </form>
+      </div>
+      </div>
 
       <div className="control-bar__shortcuts">
         {controls.map((definition) => (

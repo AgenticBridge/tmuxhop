@@ -25,6 +25,7 @@ describe("CONTROL_BUTTONS", () => {
       "Esc",
       "Tab",
       "Ctrl+C",
+      "Alt+Enter",
       "Ctrl+L",
       "↑",
       "←",

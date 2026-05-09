@@ -302,7 +302,6 @@ h1 {
 
 .empty-state,
 .terminal-panel {
-  border-radius: 22px;
   padding: 8px;
 }
 
@@ -553,7 +552,6 @@ h1 {
   height: 100%;
   background: var(--terminal);
   color: var(--terminal-ink);
-  border-radius: 16px;
   padding: 5px;
   overflow: hidden;
 }
@@ -627,10 +625,40 @@ h1 {
   background: rgba(255, 255, 255, 0.92);
   color: var(--ink);
   font: inherit;
+  resize: vertical;
+  min-height: 60px;
+  field-sizing: normal;
 }
 
 .control-bar__text-button {
   flex: 0 0 auto;
+}
+
+.control-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-bar__hint-button {
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.control-bar__hint-button:hover {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--ink);
+}
+
+.control-bar__hint-button:active {
+  transform: scale(0.96);
 }
 
 .control-bar__shortcuts {
@@ -657,7 +685,11 @@ h1 {
 @media (max-width: 760px) {
   .landing-shell,
   .app-shell {
-    width: min(100vw - 20px, 1100px);
+    width: 100%;
+    max-width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow-x: hidden;
   }
 
   .hero-card {
@@ -683,8 +715,4 @@ h1 {
   }
 }
 
-@media (min-width: 761px) {
-  .control-bar__text-entry {
-    display: none;
-  }
-}
+/* 始终显示文本框和Send按钮，移除桌面端隐藏规则 */

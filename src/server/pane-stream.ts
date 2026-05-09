@@ -10,7 +10,7 @@
 import { EventEmitter } from "node:events";
 import { spawn } from "node:child_process";
 
-import { capturePaneAnsi, getPaneSessionName, TMUX_BIN } from "./tmux.js";
+import { capturePaneAnsi, getPaneSessionName, resolveTmuxBin, TMUX_SOCKET } from "./tmux.js";
 
 export interface PaneStreamOptions {
   initialCols?: number;
@@ -32,15 +32,18 @@ export async function createPaneStream(
   const emitter = new EventEmitter();
   let closed = false;
   let buffer = "";
+  const tmuxBin = await resolveTmuxBin();
   const sessionName = await getPaneSessionName(paneId);
-  const child = spawn(TMUX_BIN, [
+  const baseArgs = [
     "-C",
     "attach-session",
     "-t",
     sessionName,
     "-f",
     "active-pane,ignore-size,wait-exit",
-  ], {
+  ];
+  const tmuxArgs = TMUX_SOCKET ? ["-L", TMUX_SOCKET, ...baseArgs] : baseArgs;
+  const child = spawn(tmuxBin, tmuxArgs, {
     stdio: ["pipe", "pipe", "pipe"],
   });
 

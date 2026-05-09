@@ -295,7 +295,7 @@ export function useAppController(): AppController {
     onTextInput: (data: string) =>
       paneConnection.sendSocketMessage({
         type: "input",
-        data: `${data}\r`,
+        data: data,  // Only send text, no Enter key
       }),
     refreshFontReport: () => {
       void refreshFontReport();

@@ -19,20 +19,20 @@ describe("getPreferredTerminalFontSize", () => {
   });
 
   it("uses a slightly denser size on tablet widths", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 720, viewportWidth: 768 })).toBe(11);
+    expect(getPreferredTerminalFontSize({ mountWidth: 720, viewportWidth: 768 })).toBe(13);
   });
 
   it("uses a denser size on phone widths", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(7);
+    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(12);
   });
 
   it("uses the densest size on very narrow phones", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(6);
+    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(11);
   });
 
   it("applies a user font-size adjustment on top of the responsive default", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390, adjustment: 2 })).toBe(9);
-    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360, adjustment: -4 })).toBe(4);
+    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390, adjustment: 2 })).toBe(14);
+    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360, adjustment: -4 })).toBe(7);
   });
 });
 

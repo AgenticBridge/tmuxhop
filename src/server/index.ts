@@ -16,6 +16,7 @@ import express, {
   type Request,
   type Response,
 } from "express";
+import compression from "compression";
 import { WebSocketServer, type WebSocket } from "ws";
 
 import type {
@@ -120,8 +121,29 @@ export async function buildWindowsResponse(
 export function createApp(dependencies: ServerDependencies = defaultDependencies) {
   const app = express();
 
+  // Enable compression for all responses
+  app.use(compression({
+    threshold: 0, // Compress all responses (even small ones)
+  }));
+
   app.use(express.json());
-  app.use(express.static(clientDistDir));
+
+  // Serve static assets with aggressive caching
+  app.use(express.static(clientDistDir, {
+    maxAge: '1y', // Cache static assets for 1 year
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+      // Set long cache for assets (hashed filenames)
+      if (filePath.includes('/assets/')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+      // HTML files - no cache (they reference assets)
+      else if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  }));
 
   app.get("/", (_req: Request, res: Response) => {
     res.sendFile(path.join(clientPagesDir, "index.html"));
@@ -163,8 +185,11 @@ export function createApp(dependencies: ServerDependencies = defaultDependencies
   );
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    console.error('Unhandled error:', errorObj.message, errorObj.stack);
     res.status(500).json({
-      error: error instanceof Error ? error.message : "Unexpected server error",
+      error: errorObj.message,
+      stack: process.env.NODE_ENV === 'development' ? errorObj.stack : undefined,
     });
   });
 
@@ -412,7 +437,13 @@ export function createServer(dependencies: ServerDependencies = defaultDependenc
       return;
     }
 
-    const paneId = decodeURIComponent(match[1] ?? "");
+    const rawPaneId = match[1] ?? "";
+    let paneId = rawPaneId;
+    try {
+      paneId = decodeURIComponent(rawPaneId);
+    } catch {
+      // paneId may contain raw % that wasn't encoded; use as-is
+    }
     const streamOptions = parsePaneStreamOptions(url);
     webSocketServer.handleUpgrade(request, socket, head, (webSocket) => {
       void handlePaneSocket(webSocket, paneId, dependencies, streamOptions);
