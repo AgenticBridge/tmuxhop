@@ -13,6 +13,7 @@ import {
   parseRows,
   pickActivePaneId,
   pickDefaultSessionName,
+  resolveTmuxBin,
 } from "../src/server/tmux.js";
 import type { SessionSummary, WindowInfo } from "../src/server/protocol.js";
 
@@ -106,5 +107,64 @@ describe("decodeInput", () => {
       mode: "literal",
       value: "git status",
     });
+  });
+});
+
+describe("resolveTmuxBin", () => {
+  it("prefers TMUX_BIN when set", async () => {
+    await expect(
+      resolveTmuxBin({
+        env: { TMUX_BIN: "/custom/tmux" },
+        pathProbe: async () => false,
+        fallbackPaths: ["/opt/homebrew/bin/tmux"],
+        isExecutablePath: () => false,
+      }),
+    ).resolves.toBe("/custom/tmux");
+  });
+
+  it("uses tmux from PATH before fallback paths", async () => {
+    await expect(
+      resolveTmuxBin({
+        env: {},
+        pathProbe: async () => true,
+        fallbackPaths: ["/opt/homebrew/bin/tmux"],
+        isExecutablePath: () => true,
+      }),
+    ).resolves.toBe("tmux");
+  });
+
+  it("falls back to the Homebrew path when PATH lookup fails", async () => {
+    await expect(
+      resolveTmuxBin({
+        env: {},
+        pathProbe: async () => false,
+        fallbackPaths: ["/opt/homebrew/bin/tmux", "/usr/bin/tmux"],
+        isExecutablePath: (path) => path === "/opt/homebrew/bin/tmux",
+      }),
+    ).resolves.toBe("/opt/homebrew/bin/tmux");
+  });
+
+  it("falls back to the Linux path when earlier candidates are unavailable", async () => {
+    await expect(
+      resolveTmuxBin({
+        env: {},
+        pathProbe: async () => false,
+        fallbackPaths: ["/opt/homebrew/bin/tmux", "/usr/local/bin/tmux", "/usr/bin/tmux"],
+        isExecutablePath: (path) => path === "/usr/bin/tmux",
+      }),
+    ).resolves.toBe("/usr/bin/tmux");
+  });
+
+  it("throws a clear error when no tmux binary is available", async () => {
+    await expect(
+      resolveTmuxBin({
+        env: {},
+        pathProbe: async () => false,
+        fallbackPaths: ["/opt/homebrew/bin/tmux", "/usr/bin/tmux"],
+        isExecutablePath: () => false,
+      }),
+    ).rejects.toThrow(
+      "tmux binary not found. Install tmux, add it to PATH, or set TMUX_BIN.",
+    );
   });
 });

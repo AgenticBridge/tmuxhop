@@ -72,7 +72,8 @@ The goal is not full remote desktop access. The goal is to make it easy to hop t
 
 By default, tmuxhop looks for:
 
-- `tmux` at `/opt/homebrew/bin/tmux`
+- `tmux` on your `PATH`, then common macOS/Linux install locations:
+  `/opt/homebrew/bin/tmux`, `/usr/local/bin/tmux`, `/usr/bin/tmux`
 - a default session named `tmuxhop`
 
 You can override those with:
