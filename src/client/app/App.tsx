@@ -13,7 +13,7 @@ import { UtilityBar } from "./components/UtilityBar.js";
 import { useAppController } from "./controller/useAppController.js";
 import { CONTROL_BUTTONS } from "./ui.js";
 
-const APP_VERSION = "0.1.0";
+const APP_VERSION = "0.2.0";
 
 export function App() {
   const controller = useAppController();

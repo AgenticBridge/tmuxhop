@@ -183,7 +183,7 @@ describe("UtilityBar", () => {
         ]}
         sessions={[{ name: "main", attached: true, windows: 1 }]}
         status={{ label: "Session disconnected", tone: "warn" }}
-        version="0.1.0"
+        version="0.2.0"
         windows={[
           {
             id: "@1",
@@ -210,7 +210,7 @@ describe("UtilityBar", () => {
     expect(screen.getByRole("button", { name: "main" })).not.toBeNull();
     expect(screen.getByRole("button", { name: "editor-window" })).not.toBeNull();
     expect(screen.getByRole("button", { name: "editor-pane" })).not.toBeNull();
-    expect(screen.getByText("Version 0.1.0")).not.toBeNull();
+    expect(screen.getByText("Version 0.2.0")).not.toBeNull();
   });
 
   it("updates the control sheet label and highlight for the selected pane level", () => {
@@ -461,7 +461,7 @@ describe("UtilityBar", () => {
         sessions={[{ name: "main", attached: true, windows: 1 }]}
         status={{ label: "Live", tone: "ok" }}
         terminalFontSize={7}
-        version="0.1.0"
+        version="0.2.0"
         windows={[]}
       />,
     );
@@ -476,6 +476,6 @@ describe("UtilityBar", () => {
     expect(onDecreaseTerminalFontSize).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("dialog", { name: "Controls" })).not.toBeNull();
     expect(screen.getByText("Size: 7")).not.toBeNull();
-    expect(screen.getByText("Version 0.1.0")).not.toBeNull();
+    expect(screen.getByText("Version 0.2.0")).not.toBeNull();
   });
 });
