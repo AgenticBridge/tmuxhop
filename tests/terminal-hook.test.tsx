@@ -363,7 +363,7 @@ describe("useTerminal", () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(terminal.options.fontSize).toBe(7);
+    expect(terminal.options.fontSize).toBe(12);
     expect(fit).toHaveBeenCalled();
     expect(resize).toHaveBeenCalledWith(90, 30);
   });
@@ -416,7 +416,7 @@ describe("useTerminal", () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(terminal.options.fontSize).toBe(9);
+    expect(terminal.options.fontSize).toBe(14);
     expect(fit).toHaveBeenCalled();
     expect(resize).toHaveBeenCalledWith(90, 30);
   });

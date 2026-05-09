@@ -27,13 +27,13 @@ describe("ControlBar", () => {
 
     const input = screen.getByLabelText("Mobile terminal input");
     fireEvent.change(input, { target: { value: "hello" } });
-    fireEvent.submit(input.closest("form") as HTMLFormElement);
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
     expect(onTextInput).toHaveBeenCalledWith("hello");
-    expect((input as HTMLInputElement).value).toBe("");
+    expect((input as HTMLTextAreaElement).value).toBe("");
   });
 
-  it("submits text with run behavior from the button", () => {
+  it("submits text from the send button", () => {
     const onShortcut = vi.fn();
     const onTextInput = vi.fn();
 
@@ -48,9 +48,9 @@ describe("ControlBar", () => {
 
     const input = screen.getByLabelText("Mobile terminal input");
     fireEvent.change(input, { target: { value: "ls -la" } });
-    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
     expect(onTextInput).toHaveBeenCalledWith("ls -la");
-    expect((input as HTMLInputElement).value).toBe("");
+    expect((input as HTMLTextAreaElement).value).toBe("");
   });
 });
