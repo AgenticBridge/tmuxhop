@@ -21,22 +21,21 @@ const DESKTOP_FONT_SIZE = 14;
 const TABLET_FONT_SIZE = 13;
 const PHONE_FONT_SIZE = 12;
 const PHONE_NARROW_FONT_SIZE = 11;
-const MIN_FONT_SIZE = 4;
-const MAX_FONT_SIZE = 24;
+export const MIN_FONT_SIZE = 4;
+export const MAX_FONT_SIZE = 24;
 
 export interface TerminalFontSizingInput {
-  adjustment?: number;
+  fontSize?: number | null;
   mountWidth: number;
   viewportWidth?: number;
 }
 
-export function getPreferredTerminalFontSize(input: TerminalFontSizingInput): number {
+export function getResponsiveTerminalFontSize(input: Omit<TerminalFontSizingInput, "fontSize">): number {
   const width = Math.max(0, Math.min(input.mountWidth || Infinity, input.viewportWidth || Infinity));
-  const adjustment = Math.trunc(input.adjustment ?? 0);
   let baseSize = DESKTOP_FONT_SIZE;
 
   if (width <= 0 || !Number.isFinite(width)) {
-    return clampTerminalFontSize(baseSize + adjustment);
+    return clampTerminalFontSize(baseSize);
   }
 
   if (width <= 380) {
@@ -47,7 +46,15 @@ export function getPreferredTerminalFontSize(input: TerminalFontSizingInput): nu
     baseSize = TABLET_FONT_SIZE;
   }
 
-  return clampTerminalFontSize(baseSize + adjustment);
+  return clampTerminalFontSize(baseSize);
+}
+
+export function resolveTerminalFontSize(input: TerminalFontSizingInput): number {
+  if (typeof input.fontSize === "number" && Number.isFinite(input.fontSize)) {
+    return clampTerminalFontSize(input.fontSize);
+  }
+
+  return getResponsiveTerminalFontSize(input);
 }
 
 export function getTerminalDimensions(terminal: Terminal): TerminalDimensions {
@@ -57,6 +64,6 @@ export function getTerminalDimensions(terminal: Terminal): TerminalDimensions {
   };
 }
 
-function clampTerminalFontSize(size: number): number {
+export function clampTerminalFontSize(size: number): number {
   return Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, size));
 }

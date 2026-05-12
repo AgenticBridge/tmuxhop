@@ -9,30 +9,43 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  getPreferredTerminalFontSize,
+  clampTerminalFontSize,
+  getResponsiveTerminalFontSize,
+  resolveTerminalFontSize,
   getTerminalDimensions,
 } from "../src/client/terminal/size.js";
 
-describe("getPreferredTerminalFontSize", () => {
+describe("getResponsiveTerminalFontSize", () => {
   it("keeps the desktop font size on wide layouts", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 960, viewportWidth: 1280 })).toBe(14);
+    expect(getResponsiveTerminalFontSize({ mountWidth: 960, viewportWidth: 1280 })).toBe(14);
   });
 
   it("uses a slightly denser size on tablet widths", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 720, viewportWidth: 768 })).toBe(13);
+    expect(getResponsiveTerminalFontSize({ mountWidth: 720, viewportWidth: 768 })).toBe(13);
   });
 
   it("uses a denser size on phone widths", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(12);
+    expect(getResponsiveTerminalFontSize({ mountWidth: 390, viewportWidth: 390 })).toBe(12);
   });
 
   it("uses the densest size on very narrow phones", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(11);
+    expect(getResponsiveTerminalFontSize({ mountWidth: 360, viewportWidth: 360 })).toBe(11);
+  });
+});
+
+describe("resolveTerminalFontSize", () => {
+  it("uses a saved absolute font size when one exists", () => {
+    expect(resolveTerminalFontSize({ fontSize: 18, mountWidth: 390, viewportWidth: 390 })).toBe(18);
   });
 
-  it("applies a user font-size adjustment on top of the responsive default", () => {
-    expect(getPreferredTerminalFontSize({ mountWidth: 390, viewportWidth: 390, adjustment: 2 })).toBe(14);
-    expect(getPreferredTerminalFontSize({ mountWidth: 360, viewportWidth: 360, adjustment: -4 })).toBe(7);
+  it("falls back to the responsive default when no size is saved", () => {
+    expect(resolveTerminalFontSize({ fontSize: null, mountWidth: 390, viewportWidth: 390 })).toBe(12);
+  });
+
+  it("clamps saved absolute font sizes to supported bounds", () => {
+    expect(resolveTerminalFontSize({ fontSize: 99, mountWidth: 960, viewportWidth: 1280 })).toBe(24);
+    expect(resolveTerminalFontSize({ fontSize: -99, mountWidth: 960, viewportWidth: 1280 })).toBe(4);
+    expect(clampTerminalFontSize(12.9)).toBe(12.9);
   });
 });
 

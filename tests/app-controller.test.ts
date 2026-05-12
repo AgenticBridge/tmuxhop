@@ -49,6 +49,13 @@ const paneConnectionMock = vi.hoisted(() => ({
   sendSocketMessage: vi.fn(),
 }));
 
+const terminalHookMock = vi.hoisted(() => ({
+  latestOptions: null as null | {
+    fontSize: number | null;
+    onResolvedFontSizeChange?: (fontSize: number) => void;
+  },
+}));
+
 vi.mock("../src/client/app/controller/useSessions.js", () => ({
   useSessions: () => ({
     latestStateRef: {
@@ -79,13 +86,19 @@ vi.mock("../src/client/app/controller/usePaneConnection.js", () => ({
 }));
 
 vi.mock("../src/client/app/hooks/useTerminal.js", () => ({
-  useTerminal: (_options: unknown) => ({
-    mountRef: { current: document.createElement("div") },
-    getCurrentTerminalSize: vi.fn(() => ({ cols: 90, rows: 30 })),
-    syncTerminalSize: vi.fn(),
-    resetTerminal: vi.fn(),
-    writeToTerminal: vi.fn(),
-  }),
+  useTerminal: (options: unknown) => {
+    terminalHookMock.latestOptions = options as {
+      fontSize: number | null;
+      onResolvedFontSizeChange?: (fontSize: number) => void;
+    };
+    return {
+      mountRef: { current: document.createElement("div") },
+      getCurrentTerminalSize: vi.fn(() => ({ cols: 90, rows: 30 })),
+      syncTerminalSize: vi.fn(),
+      resetTerminal: vi.fn(),
+      writeToTerminal: vi.fn(),
+    };
+  },
 }));
 
 vi.mock("../src/client/terminal/font-diagnostics.js", () => ({
@@ -98,6 +111,8 @@ describe("useAppController", () => {
     vi.clearAllMocks();
     vi.useRealTimers();
     sessionsMock.refreshSessions.mockResolvedValue("notes");
+    terminalHookMock.latestOptions = null;
+    window.localStorage.clear();
   });
 
   it("keeps font status in checking state until the bundled font preload completes", async () => {
@@ -163,6 +178,52 @@ describe("useAppController", () => {
     });
 
     expect(fontDiagnosticsMock.detectFontCompatibility).toHaveBeenCalledTimes(1);
+  });
+
+  it("loads a persisted absolute terminal font size into the terminal hook", () => {
+    window.localStorage.setItem("tmuxhop.terminal-font-size", "18");
+
+    renderHook(() => useAppController());
+
+    expect(terminalHookMock.latestOptions?.fontSize).toBe(18);
+  });
+
+  it("persists absolute terminal font size changes from the current resolved size", async () => {
+    const { result } = renderHook(() => useAppController());
+
+    await act(async () => {
+      terminalHookMock.latestOptions?.onResolvedFontSizeChange?.(12);
+    });
+
+    await act(async () => {
+      result.current.onIncreaseTerminalFontSize();
+    });
+
+    expect(window.localStorage.getItem("tmuxhop.terminal-font-size")).toBe("13");
+    expect(terminalHookMock.latestOptions?.fontSize).toBe(13);
+
+    await act(async () => {
+      result.current.onDecreaseTerminalFontSize();
+    });
+
+    expect(window.localStorage.getItem("tmuxhop.terminal-font-size")).toBe("12");
+    expect(terminalHookMock.latestOptions?.fontSize).toBe(12);
+  });
+
+  it("bases the first font-size change on the responsive startup size before terminal mount resolves", async () => {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 390,
+    });
+
+    const { result } = renderHook(() => useAppController());
+
+    await act(async () => {
+      result.current.onIncreaseTerminalFontSize();
+    });
+
+    expect(window.localStorage.getItem("tmuxhop.terminal-font-size")).toBe("13");
+    expect(terminalHookMock.latestOptions?.fontSize).toBe(13);
   });
 
   it("loads windows and then attaches the returned pane on session change", async () => {

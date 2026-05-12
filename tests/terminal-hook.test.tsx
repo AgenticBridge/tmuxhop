@@ -38,19 +38,19 @@ const onReadySpy = vi.fn();
 
 interface TerminalHarnessProps {
   fontFamily?: string;
-  fontSizeAdjustment?: number;
+  fontSize?: number | null;
   fontMode?: "bundled" | "installed-nerd" | "system";
 }
 
 function TerminalHarness(props: TerminalHarnessProps = {}) {
   const {
     fontFamily = '"Tmuxhop Terminal Nerd Font", monospace',
-    fontSizeAdjustment = 0,
+    fontSize = null,
     fontMode = "bundled",
   } = props;
   const terminal = useTerminal({
     fontFamily,
-    fontSizeAdjustment,
+    fontSize,
     fontMode,
     onInput: onInputSpy,
     onReady: onReadySpy,
@@ -412,13 +412,76 @@ describe("useTerminal", () => {
     fit.mockClear();
     resize.mockClear();
 
-    rerender(<TerminalHarness fontSizeAdjustment={2} />);
+    rerender(<TerminalHarness fontSize={16} />);
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(terminal.options.fontSize).toBe(14);
+    expect(terminal.options.fontSize).toBe(16);
     expect(fit).toHaveBeenCalled();
     expect(resize).toHaveBeenCalledWith(90, 30);
+  });
+
+  it("keeps a saved absolute terminal font size across viewport changes", async () => {
+    vi.useFakeTimers();
+    fontDiagnosticsMock.ensureBundledTerminalFontReady.mockResolvedValue(undefined);
+
+    Object.defineProperty(window, "ResizeObserver", {
+      configurable: true,
+      value: ResizeObserverStub,
+    });
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 1280,
+    });
+
+    const fit = vi.fn();
+    const resize = vi.fn();
+    const terminal = {
+      cols: 90,
+      rows: 30,
+      dispose: vi.fn(),
+      onData: vi.fn(),
+      options: { fontFamily: '"Tmuxhop Terminal Nerd Font", monospace', fontSize: 18 },
+      open: vi.fn(),
+      reset: vi.fn(),
+      resize,
+      write: vi.fn(),
+    };
+
+    runtimeMock.createTerminalRuntime.mockReturnValue({
+      fitAddon: { fit },
+      terminal,
+    });
+
+    const { container } = render(<TerminalHarness fontSize={18} />);
+    const mount = container.firstElementChild as HTMLDivElement;
+    Object.defineProperty(mount, "clientWidth", {
+      configurable: true,
+      value: 960,
+    });
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    fit.mockClear();
+    resize.mockClear();
+
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 360,
+    });
+    Object.defineProperty(mount, "clientWidth", {
+      configurable: true,
+      value: 360,
+    });
+
+    fireEvent(window, new Event("resize"));
+    await Promise.resolve();
+
+    expect(terminal.options.fontSize).toBe(18);
+    expect(fit).toHaveBeenCalled();
+    expect(resize).not.toHaveBeenCalled();
   });
 
   it("waits for bundled font loading before refitting when switching from system mode", async () => {

@@ -24,15 +24,15 @@ import {
   type FontCompatibilityReport,
 } from "../../terminal/font-diagnostics.js";
 import {
-  clampTerminalFontSizeAdjustment,
   getTerminalFontStack,
-  loadTerminalFontSizeAdjustment,
+  loadTerminalFontSize,
   loadTerminalFontMode,
-  saveTerminalFontSizeAdjustment,
+  saveTerminalFontSize,
   saveTerminalFontMode,
   terminalFontModeNeedsBundledAsset,
   type TerminalFontMode,
 } from "../../terminal/settings.js";
+import { clampTerminalFontSize, getResponsiveTerminalFontSize } from "../../terminal/size.js";
 import { useTerminal } from "../hooks/useTerminal.js";
 import type { StatusState, StatusTone } from "../ui.js";
 import type { AppController } from "./types.js";
@@ -43,10 +43,12 @@ import { useSessions } from "./useSessions.js";
 export function useAppController(): AppController {
   const [status, setStatus] = useState<StatusState>({ label: "Connecting", tone: "default" });
   const [fontMode, setFontMode] = useState<TerminalFontMode>(() => loadTerminalFontMode());
-  const [terminalFontSizeAdjustment, setTerminalFontSizeAdjustment] = useState<number>(() =>
-    loadTerminalFontSizeAdjustment(),
+  const [savedTerminalFontSize, setSavedTerminalFontSize] = useState<number | null>(() =>
+    loadTerminalFontSize(),
   );
-  const [terminalFontSize, setTerminalFontSize] = useState(14);
+  const [terminalFontSize, setTerminalFontSize] = useState(() =>
+    getInitialTerminalFontSize(savedTerminalFontSize),
+  );
   const [fontReport, setFontReport] = useState<FontCompatibilityReport>(
     createPendingFontCompatibilityReport,
   );
@@ -167,7 +169,7 @@ export function useAppController(): AppController {
 
   const terminal = useTerminal({
     fontFamily: terminalFontStack,
-    fontSizeAdjustment: terminalFontSizeAdjustment,
+    fontSize: savedTerminalFontSize,
     fontMode,
     onInput: useCallback((data: string) => {
       sendSocketMessageRef.current({ type: "input", data });
@@ -235,18 +237,16 @@ export function useAppController(): AppController {
       setFontReport(createPendingFontCompatibilityReport());
     },
     onDecreaseTerminalFontSize: () => {
-      setTerminalFontSizeAdjustment((currentAdjustment) => {
-        const nextAdjustment = clampTerminalFontSizeAdjustment(currentAdjustment - 1);
-        saveTerminalFontSizeAdjustment(nextAdjustment);
-        return nextAdjustment;
-      });
+      const nextFontSize = clampTerminalFontSize(terminalFontSize - 1);
+      setSavedTerminalFontSize(nextFontSize);
+      setTerminalFontSize(nextFontSize);
+      saveTerminalFontSize(nextFontSize);
     },
     onIncreaseTerminalFontSize: () => {
-      setTerminalFontSizeAdjustment((currentAdjustment) => {
-        const nextAdjustment = clampTerminalFontSizeAdjustment(currentAdjustment + 1);
-        saveTerminalFontSizeAdjustment(nextAdjustment);
-        return nextAdjustment;
-      });
+      const nextFontSize = clampTerminalFontSize(terminalFontSize + 1);
+      setSavedTerminalFontSize(nextFontSize);
+      setTerminalFontSize(nextFontSize);
+      saveTerminalFontSize(nextFontSize);
     },
     onReconnect: () => {
       void reconnectSelectedPane();
@@ -317,6 +317,26 @@ export function useAppController(): AppController {
 
 async function waitForFontProbeBudget() {
   await Promise.race([ensureBundledTerminalFontReady(), waitForFontProbeTimeout()]);
+}
+
+function getInitialTerminalFontSize(savedTerminalFontSize: number | null): number {
+  if (savedTerminalFontSize !== null) {
+    return savedTerminalFontSize;
+  }
+
+  const viewportWidth = getSafeViewportWidth();
+  return getResponsiveTerminalFontSize({
+    mountWidth: viewportWidth,
+    viewportWidth,
+  });
+}
+
+function getSafeViewportWidth(): number {
+  try {
+    return window.innerWidth;
+  } catch {
+    return 0;
+  }
 }
 
 function waitForFontProbeTimeout() {

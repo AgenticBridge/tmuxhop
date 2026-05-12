@@ -9,13 +9,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  clampTerminalFontSizeAdjustment,
   getTerminalFontStack,
   INSTALLED_NERD_FONT_STACK,
-  loadTerminalFontSizeAdjustment,
+  loadTerminalFontSize,
   loadTerminalFontMode,
   saveTerminalFontMode,
-  saveTerminalFontSizeAdjustment,
+  saveTerminalFontSize,
   SYSTEM_TERMINAL_FONT_STACK,
   terminalFontModeNeedsBundledAsset,
 } from "../src/client/terminal/settings.js";
@@ -35,24 +34,59 @@ describe("terminal font settings", () => {
     expect(setItem).toHaveBeenCalledWith("tmuxhop.terminal-font-mode", "installed-nerd");
   });
 
-  it("defaults terminal font size adjustment to zero when nothing is stored", () => {
-    expect(loadTerminalFontSizeAdjustment({ getItem: vi.fn(() => null) })).toBe(0);
+  it("defaults terminal font size to unset when nothing is stored", () => {
+    expect(loadTerminalFontSize({ getItem: vi.fn(() => null) })).toBeNull();
   });
 
-  it("loads a persisted terminal font size adjustment", () => {
-    expect(loadTerminalFontSizeAdjustment({ getItem: vi.fn(() => "2") })).toBe(2);
+  it("loads a persisted terminal font size", () => {
+    expect(loadTerminalFontSize({ getItem: vi.fn(() => "18") })).toBe(18);
   });
 
-  it("clamps a persisted terminal font size adjustment", () => {
-    expect(loadTerminalFontSizeAdjustment({ getItem: vi.fn(() => "99") })).toBe(6);
-    expect(loadTerminalFontSizeAdjustment({ getItem: vi.fn(() => "-99") })).toBe(-2);
-    expect(clampTerminalFontSizeAdjustment(1.8)).toBe(1);
-  });
-
-  it("persists the selected terminal font size adjustment", () => {
+  it("migrates the legacy font-size adjustment into the new absolute-size key", () => {
+    const getItem = vi.fn((key: string) => {
+      if (key === "tmuxhop.terminal-font-size") {
+        return null;
+      }
+      if (key === "tmuxhop.terminal-font-size-adjustment") {
+        return "2";
+      }
+      return null;
+    });
     const setItem = vi.fn();
-    saveTerminalFontSizeAdjustment(3, { setItem });
-    expect(setItem).toHaveBeenCalledWith("tmuxhop.terminal-font-size-adjustment", "3");
+    const removeItem = vi.fn();
+
+    expect(loadTerminalFontSize({ getItem, setItem, removeItem }, 390)).toBe(14);
+    expect(setItem).toHaveBeenCalledWith("tmuxhop.terminal-font-size", "14");
+    expect(removeItem).toHaveBeenCalledWith("tmuxhop.terminal-font-size-adjustment");
+  });
+
+  it("prefers the new absolute-size key over the legacy adjustment key", () => {
+    const getItem = vi.fn((key: string) => {
+      if (key === "tmuxhop.terminal-font-size") {
+        return "18";
+      }
+      if (key === "tmuxhop.terminal-font-size-adjustment") {
+        return "2";
+      }
+      return null;
+    });
+    const setItem = vi.fn();
+    const removeItem = vi.fn();
+
+    expect(loadTerminalFontSize({ getItem, setItem, removeItem }, 390)).toBe(18);
+    expect(setItem).not.toHaveBeenCalled();
+    expect(removeItem).not.toHaveBeenCalled();
+  });
+
+  it("clamps a persisted terminal font size to supported bounds", () => {
+    expect(loadTerminalFontSize({ getItem: vi.fn(() => "99") })).toBe(24);
+    expect(loadTerminalFontSize({ getItem: vi.fn(() => "-99") })).toBe(4);
+  });
+
+  it("persists the selected terminal font size", () => {
+    const setItem = vi.fn();
+    saveTerminalFontSize(18, { setItem });
+    expect(setItem).toHaveBeenCalledWith("tmuxhop.terminal-font-size", "18");
   });
 
   it("uses the bundled stack for bundled mode", () => {
@@ -84,8 +118,8 @@ describe("terminal font settings", () => {
     };
 
     expect(loadTerminalFontMode(blockedStorage)).toBe("bundled");
-    expect(loadTerminalFontSizeAdjustment(blockedStorage)).toBe(0);
+    expect(loadTerminalFontSize(blockedStorage)).toBeNull();
     expect(() => saveTerminalFontMode("system", blockedStorage)).not.toThrow();
-    expect(() => saveTerminalFontSizeAdjustment(2, blockedStorage)).not.toThrow();
+    expect(() => saveTerminalFontSize(18, blockedStorage)).not.toThrow();
   });
 });
